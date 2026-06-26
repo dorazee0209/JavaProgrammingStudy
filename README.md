@@ -12,8 +12,8 @@
 전체 34장 (윤성우 「열혈 Java 프로그래밍」 목차)
 
 - [x] Chapter 01 - Let's Start Java! (p11-38) [완료일: 26.06.25]
-- [ ] Chapter 02 - 변수와 자료형 (p39-62)
-- [ ] Chapter 03 - 상수와 형 변환 (p63-76)
+- [x] Chapter 02 - 변수와 자료형 (p39-62)
+- [x] Chapter 03 - 상수와 형 변환 (p63-76)
 - [ ] Chapter 04 - 연산자(Operators) (p77-102)
 - [ ] Chapter 05 - 실행 흐름의 컨트롤 (p103-136)
 - [ ] Chapter 06 - 메소드와 변수의 스코프 (p137-154)
