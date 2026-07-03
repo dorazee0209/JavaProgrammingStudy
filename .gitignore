@@ -3,3 +3,6 @@
 *.class
 열혈Java_훑어보기.md
 CLAUDE.md
+out/
+.idea/
+JavaProgrammingStudy.iml
