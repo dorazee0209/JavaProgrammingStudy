@@ -4,7 +4,7 @@
  * 작 성 일: 260625
  **/
 
-public class P034BlockComment {
+public class P035_BlockComment2 {
     public static void main(String[] args) {
         /*다음은 단순한 정수의 출력*/
         System.out.println(7);
