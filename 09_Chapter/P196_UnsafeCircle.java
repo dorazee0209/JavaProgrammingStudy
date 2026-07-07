@@ -1,6 +1,6 @@
 class Circle {
     double rad;
-    fianl double PI = 3.14;
+    final double PI = 3.14;
 
     public Circle(double rad) {
         this.rad = rad;
@@ -11,14 +11,14 @@ class Circle {
             rad = 0;
             return;
         }
-        this.rad = r;
+        this.rad = rad;
     }
 
     public double getArea() {
         return getPower(rad) * PI;
     }
 
-    protected double getPower(double rad) {
+    private double getPower(double rad) {
         return rad * rad;
     }
 }
@@ -26,6 +26,15 @@ class Circle {
 public class P196_UnsafeCircle {
     static void main(String[] args) {
         Circle c = new Circle(1.5);
+        System.out.println(c.getArea());
+
+        c.setRad(2.5);
+        System.out.println(c.getArea());
+
+        c.setRad(-3.3);
+        System.out.println(c.getArea());
+
+        c.rad = -4.5; // inappropriate access!!
         System.out.println(c.getArea());
     }
 }
