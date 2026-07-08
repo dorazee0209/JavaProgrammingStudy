@@ -15,6 +15,21 @@
 
 - 클래스 정의 대상: `public`, `default`
 
+클래스에는 `protected`, `private`를 붙일 수 없다. 클래스 자체를 `protected`나 `private`로 제한해버리면 그 클래스를 외부에서 아예 쓸 수 없게 되어 의미가 없어지기 때문이다.
+
 그리고 인스턴스 변수와 메소드를 대상으로는 다음 네 가지 선언이 모두 가능하다.
 
 - 인스턴스 변수와 메소드 대상: `public`, `protected`, `private`, `default`
+
+접근 가능한 범위는 다음과 같다 (좁은 것 → 넓은 것 순).
+
+- `private` → 같은 클래스 내부에서만
+- `default` (아무것도 안 붙임) → 같은 패키지 내에서만
+- `protected` → 같은 패키지 + 상속받은 자식 클래스
+- `public` → 어디서든
+
+접근 허용 범위를 부등식으로 나타내면 다음과 같다.
+
+```
+public > protected > default > private
+```
