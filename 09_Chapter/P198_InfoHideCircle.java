@@ -28,7 +28,7 @@ class Circle {
 }
 
 public class P198_InfoHideCircle {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         Circle c = new Circle(1.5);
         printResult(c);
 

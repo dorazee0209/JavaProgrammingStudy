@@ -1,7 +1,7 @@
 import java.sql.SQLOutput;
 
 public class P143_MethodReturns {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         int result;
         result = adder(4, 5);
         System.out.println("4 + 5 = " + result);

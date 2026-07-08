@@ -35,7 +35,7 @@ class ColdPatient {
 }
 
 public class P214_CompEncapsulation {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         ColdPatient suf = new ColdPatient();
 
         suf.takeSinus(new SinusCap());

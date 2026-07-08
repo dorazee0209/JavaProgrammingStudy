@@ -1,5 +1,5 @@
 public class P145_OnlyExitReturn {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         divide(4, 2);
         divide(6, 2);
         divide(9, 0);

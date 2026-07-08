@@ -1,4 +1,4 @@
-public class BankAccount{
+class BankAccount{
     int balance = 0;
 
     public int deposit(int amount) {
@@ -22,7 +22,7 @@ public class BankAccount{
 }
 
 public class P165_PassingRef {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         BankAccount ref = new BankAccount();
         ref.deposit(3_000);
         ref.withdraw(300);

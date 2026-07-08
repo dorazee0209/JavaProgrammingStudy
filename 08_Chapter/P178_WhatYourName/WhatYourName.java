@@ -11,7 +11,7 @@ class BBB {
 }
 
 public class WhatYourName {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         AAA aaa = new AAA();
         BBB bbb = new BBB();
 

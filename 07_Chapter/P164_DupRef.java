@@ -1,6 +1,6 @@
 
 
-public class BankAccount{
+class BankAccount{
     int balance = 0;
 
     public int deposit(int amount) {
@@ -24,7 +24,7 @@ public class BankAccount{
 }
 
 public class P164_DupRef {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         BankAccount ref1= new BankAccount();
         BankAccount ref2 = ref1;
 

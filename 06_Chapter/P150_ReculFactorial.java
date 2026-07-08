@@ -1,5 +1,5 @@
 public class P150_ReculFactorial {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         System.out.println("3F: " + factorial(3));
         System.out.println("12F: " + factorial(12));
     }

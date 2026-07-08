@@ -24,7 +24,7 @@ class Circle {
 }
 
 public class P196_UnsafeCircle {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         Circle c = new Circle(1.5);
         System.out.println(c.getArea());
 

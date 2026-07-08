@@ -1,4 +1,4 @@
-public class BankAccount{
+class BankAccount{
     String acc_number;
     String ssn;
     int balance;
@@ -32,7 +32,7 @@ public class BankAccount{
 }
 
 public class P169_BankAccountUniID {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         BankAccount yoon = new BankAccount();
         yoon.initAccoumt("12-34-89", "990990-9090990", 10_000);
 

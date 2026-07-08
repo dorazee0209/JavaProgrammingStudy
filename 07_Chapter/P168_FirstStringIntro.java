@@ -1,5 +1,5 @@
 public class P168_FirstStringIntro {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         String str1 = "Happy";
         String str2 = "Birthday";
         System.out.println(str1 + " " + str2);
