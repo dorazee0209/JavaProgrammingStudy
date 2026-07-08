@@ -28,8 +28,37 @@
  * 출력했을 때, 원의 좌표 정보와 반지름 정보는 반드시 출력이 되도록 구현해야 한다.
  */
 
+class Point {
+    int xPos, yPos;
+    public Point(int x, int y) {
+        xPos = x;
+        yPos = y;
+    }
+    public void showPointInfo() {
+        System.out.println("[" + xPos + ", " + yPos + "]");
+    }
+}
+
+class Circle {
+    int rad;
+    Point pnt;
+
+    public Circle(int x, int y, int rad) { // Constructor 2, 2, 4
+//        Point point = new Point(x, y);
+        this.rad = rad;
+        pnt = new Point(x, y);
+    }
+
+    void showCircleInfo() {
+        System.out.print("좌표 정보: ");
+        pnt.showPointInfo();
+        System.out.println("반지름 정보: " + rad);
+    }
+}
+
 public class Answer01 {
     public static void main(String[] args) {
-
+        Circle c = new Circle(2, 2, 4);    // 좌표 [2, 2] 반지름 4인 원의 생성
+        c.showCircleInfo();                // 원의 정보 출력
     }
 }
