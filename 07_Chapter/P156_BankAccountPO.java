@@ -1,7 +1,7 @@
 public class P156_BankAccountPO {
     static int balance = 0;
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         deposit(10_000);
         checkBalance();
         withdraw(3_000);

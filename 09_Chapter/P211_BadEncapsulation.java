@@ -31,7 +31,7 @@ class ColdPatient {
 }
 
 public class P211_BadEncapsulation {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         ColdPatient suf = new ColdPatient();
 
         suf.takeSnivelCap(new SnivelCap());

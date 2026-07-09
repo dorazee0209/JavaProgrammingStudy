@@ -25,7 +25,7 @@ class ColdPatient {
 }
 
 public class P213_OneClassEncapsulation {
-    static void main() {
+    public static void main() {
         ColdPatient suf = new ColdPatient();
         suf.takeSinus(new SinusCap());
     }

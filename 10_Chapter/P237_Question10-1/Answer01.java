@@ -17,7 +17,22 @@
  */
 
 public class Answer01 {
-    public static void main(String[] args) {
+    static int num;
 
+    static {
+        num = 0;
+    }
+
+    static void add(int i) {
+        num += i;
+    }
+    static void showResult() {
+        System.out.println("sum = " + num);
+    }
+
+    public static void main(String[] args) {
+        for(int i = 0; i < 10; i++)
+            Answer01.add(i);          // 인자로 전달되는 값을 모두 누적
+        Answer01.showResult();        // 최종 누적 결과를 출력
     }
 }

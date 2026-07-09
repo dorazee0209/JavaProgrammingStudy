@@ -33,7 +33,7 @@ class BankAccount {
 }
 
 public class P172_BankAccountConstructor {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         BankAccount yoon = new BankAccount("12-34-89", "990990-9090990", 10_000);
         BankAccount park = new BankAccount("33-55-09", "770088-5959007", 10_000);
 

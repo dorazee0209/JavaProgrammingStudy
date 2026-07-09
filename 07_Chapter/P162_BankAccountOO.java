@@ -1,4 +1,4 @@
-public class BankAccount{
+class BankAccount{
     static int balance = 0;
 
     public int deposit(int amount) {
@@ -22,7 +22,7 @@ public class BankAccount{
 }
 
 public class P162_BankAccountOO {
-    static void main(String[] args) {
+    public static void main(String[] args) {
         BankAccount Yoon = new BankAccount();
         BankAccount Park = new BankAccount();
 
