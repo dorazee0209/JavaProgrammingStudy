@@ -25,8 +25,8 @@ class AAA {
 ```
 논리적으로 생각해보면 위 문장 구성은 불가능하다. 인스턴스 변수는 인스턴스에 속하고, 인스턴스가 생성되어야 메모리 공간에 존재하게 된다. 반면 클래스 메소드는 인스턴스 생성 이전부터 호출이 가능하다. 그런데 어떻게 위와 같은 문장을 구성할 수 있겠는가? 따라서 다음과 같이 답할 수 있어야 한다.
 
-> "클래스 메소드는 인스턴스에 속하지 않으므로 인스턴스 변수에 접근이 불가능하다."
-> "같은 이유로 클래스 메소드는 인스턴스 메소드의 호출도 불가능하다."
+> "클래스 메소드는 인스턴스에 속하지 않으므로 인스턴스 변수에 접근이 불가능하다.
+> 같은 이유로 클래스 메소드는 인스턴스 메소드의 호출도 불가능하다."
 
 실제로 컴파일해보면 다음과 같은 에러가 난다.
 ```java
@@ -51,7 +51,7 @@ class AAA {
 }
 ```
 
-#### 참고 — static 메소드를 인스턴스명으로 호출하는 것도 문법상 가능은 하다
+### 참고 — static 메소드를 인스턴스명으로 호출하는 것도 문법상 가능은 하다
 ```java
 AAA a = new AAA();
 a.addNum(5);       // 컴파일 O, 실행 O — 그러나 경고 발생
@@ -111,15 +111,15 @@ public static void main(String[] args)
 
 `P231_CarNBoat_MainInCar/CarNBoat.java`, `P232_CarNBoat_MainInBoat/CarNBoat.java`, `P233_CarNBoat_MainInBoth/CarNBoat.java` 모두 한 파일에 `Car`, `Boat` 두 클래스가 정의되어 있지만, **어느 클래스에 main이 있는지 / 파일 내 몇 번째로 선언되었는지**에 따라 실행 가능 여부가 갈린다.
 
-#### P231_CarNBoat_MainInCar/CarNBoat.java — `main`이 있는 `Car`가 파일에서 첫 번째로 선언됨
+### P231_CarNBoat_MainInCar/CarNBoat.java — `main`이 있는 `Car`가 파일에서 첫 번째로 선언됨
 - 정석적인 실행 방법: `javac CarNBoat.java` 후 `java Car` (메인 메소드가 포함된 클래스 이름으로 실행)
 - 하지만: 메인 메소드가 포함된 클래스(`Car`)가 파일의 top-level 클래스 중 **첫 번째**이므로, `java CarNBoat.java` (파일명)로도 실행됨
 
-#### P232_CarNBoat_MainInBoat/CarNBoat.java — `main`이 있는 `Boat`가 파일에서 두 번째로 선언됨
+### P232_CarNBoat_MainInBoat/CarNBoat.java — `main`이 있는 `Boat`가 파일에서 두 번째로 선언됨
 - 정석적인 실행 방법: `javac CarNBoat.java` 후 `java Boat`
 - 하지만: 파일의 첫 번째 top-level 클래스는 `Car`인데 여기엔 `main`이 없으므로, `java CarNBoat.java`로는 실행되지 않음 (P231과 달리 안 됨)
 
-#### P233_CarNBoat_MainInBoth/CarNBoat.java — `Car`, `Boat` 둘 다 `main`을 가짐
+### P233_CarNBoat_MainInBoth/CarNBoat.java — `Car`, `Boat` 둘 다 `main`을 가짐
 - `Car`와 `Boat`가 각각 독립적인 진입점(entry point)이 되므로, `javac CarNBoat.java` 후 `java Car`, `java Boat` **둘 다** 실행 가능 (이 예제는 두 main의 내용이 동일해서 어느 쪽으로 실행해도 결과가 같음)
 - `java CarNBoat.java`(파일명 실행)도 됨: 파일의 첫 번째 top-level 클래스인 `Car`에 유효한 `main`이 있기 때문 — 이때 실행되는 건 `Boat`의 main이 아니라 **`Car`의 main**
 - 즉 한 파일에 `main`을 여러 개 둬도 문법적으로 문제없다. 다만 **JVM이 어떤 클래스의 main을 실행할지는 `java` 명령에 지정한 클래스 이름(또는 파일명 실행 시 첫 번째 top-level 클래스)이 결정**한다.
