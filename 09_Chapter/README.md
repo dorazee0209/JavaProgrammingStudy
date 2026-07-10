@@ -60,7 +60,7 @@ public class P198_InfoHideCircle {
 - 만약 `printResult`에서 `static`을 빼면 `main`(static)이 `this` 없이 non-static 메소드를 부르려는 셈이 되어 `non-static method printResult(Circle) cannot be referenced from a static context` 컴파일 에러가 난다.
 - `this.printResult(c)`로 고쳐써도 안 되는 건 마찬가지다. `this`는 "지금 실행 중인 메소드가 속한 객체 자기 자신"을 가리키는 참조인데, `main`은 static이라 애초에 속한 객체가 없다. 즉 `this`라는 이름의 변수 자체가 `main` 안에는 존재하지 않으므로 `this.printResult(c)`도 `non-static variable this cannot be referenced from a static context` 컴파일 에러가 난다.
 
-## 정리 📋
+## 정리
 
 1. **클래스 내에 선언하는 변수, static 붙이면?** → static을 붙여서 선언한 변수는 **클래스 변수**(모든 객체가 공유), 붙이지 않은 변수는 **인스턴스 변수**(객체마다 별도)다.
 2. **static 변수엔 `this`를 못 붙여?** → non-static 메소드 안에서라면 `this.count`처럼 써도 문법상 컴파일은 된다(다만 스타일상 비권장, `ClassName.count`가 더 명확한 표기). 진짜 못 쓰는 경우는 **static 메소드 안**이다 — 거긴 `this` 자체가 없어서, static 변수든 아니든 상관없이 `this`를 쓰는 순간 에러가 난다.
