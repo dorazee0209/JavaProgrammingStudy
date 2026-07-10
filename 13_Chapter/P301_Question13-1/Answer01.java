@@ -11,9 +11,38 @@
  *
  * 답안은 출판사 홈페이지를 통해서 제공합니다.
  */
+import java.util.Scanner;
 
 public class Answer01 {
     public static void main(String[] args) {
+        Scanner sc = new Scanner(args[0]);
+        final int CNT = sc.nextInt();
+        if(CNT != args.length - 1) {
+            System.err.println("Wrong param");
+            return;
+        }
 
+        int[] arr = new int[CNT];
+        for (int i = 0; i < CNT; i++) {
+            arr[i] = Integer.parseInt(args[i+1]);
+            }
+
+        System.out.printf("Min value: %d\n", minValue(arr));
+        System.out.printf("Max value: %d\n" ,maxValue(arr));
+    }
+
+    public static int minValue(int[] arr) {
+        int temp = arr[0];
+        for (int i = 1; i < arr.length; i++)
+            if(temp > arr[i])
+                temp = arr[i];
+        return temp;
+    }
+    public static int maxValue(int[] arr) {
+        int temp = arr[0];
+        for (int i : arr)
+            if(temp < i)
+                temp = i;
+        return temp;
     }
 }
