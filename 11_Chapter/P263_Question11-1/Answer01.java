@@ -10,6 +10,9 @@
 
 public class Answer01 {
     public static void main(String[] args) {
+        String SSN = "990925-1012999";
+        SSN = SSN.substring(0, 6).concat(" ").concat(SSN.substring(7));
 
+        System.out.println(SSN);
     }
 }

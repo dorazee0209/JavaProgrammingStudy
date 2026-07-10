@@ -10,6 +10,14 @@
 
 public class Answer01 {
     public static void main(String[] args) {
-
+        StringBuilder SSN = new StringBuilder("990925-1012999");
+        System.out.println(SSN.delete(6, 7).insert(6, " ").toString());
     }
 }
+
+/*
+ * 참고: delete(6, 7) + insert(6, " ") 두 단계 대신,
+ * replace(6, 7, " ") 하나로도 "삭제 후 그 자리에 삽입"을 동일하게 처리할 수 있다.
+ *     SSN.replace(6, 7, " ");
+ * 결과는 완전히 같지만 메소드 호출이 한 번 줄어든다 (공식 답안 키 방식).
+ */
