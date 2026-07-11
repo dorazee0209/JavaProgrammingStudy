@@ -18,8 +18,36 @@
  * 답안은 출판사 홈페이지를 통해서 제공합니다.
  */
 
+import java.util.Scanner;
+
 public class Answer01 {
     public static void main(String[] args) {
+        int[][] arr = {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9}
+        };
 
+        System.out.print("증가 시킬 값: ");
+        Scanner sc = new Scanner(System.in);
+        int num = sc.nextInt();
+
+        addTwoDArr(arr, num);
+
+        for (int[] ints : arr) {
+            for (int anInt : ints)
+                System.out.printf("%d\t", anInt);
+            System.out.println();
+        }
+    }
+
+    public static void addOneDArr(int[] arr, int add) {
+        for (int i = 0; i < arr.length; i++)
+            arr[i] += add;
+    }
+
+    public static void addTwoDArr(int[][] arr, int add) {
+        for (int i = 0; i < arr.length; i++)
+            addOneDArr(arr[i], add);
     }
 }
