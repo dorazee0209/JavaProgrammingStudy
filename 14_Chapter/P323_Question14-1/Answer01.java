@@ -25,8 +25,41 @@
  * 는 바를 몰라도 해결이 가능하다.
  */
 
+class Car {          // 기본 연료 자동차
+    int gasolineGauge;       // 가솔린 잔여량
+
+    Car(int gasolineGauge) {
+        this.gasolineGauge = gasolineGauge;
+    }
+}
+
+class HybridCar extends Car {        // 하이브리드 자동차
+    int electricGauge;       // 전기 배터리 잔여량
+
+    HybridCar(int gG, int electricGauge) {
+        super(gG);
+        this.electricGauge = electricGauge;
+    }
+}
+
+class HybridWaterCar extends HybridCar {     // 하이브리드 워터카
+    int waterGauge;      // 에너지 전환용 물의 잔여량
+
+    HybridWaterCar(int gG, int eG, int waterGauge) {
+        super(gG, eG);
+        this.waterGauge = waterGauge;
+    }
+
+    public void showCurrentGauge() {
+        System.out.println("잔여 가솔린: " + gasolineGauge);
+        System.out.println("잔여 전기량: " + electricGauge);
+        System.out.println("잔여 워터량: " + waterGauge);
+    }
+}
+
 public class Answer01 {
     public static void main(String[] args) {
-
+        HybridWaterCar c1 = new HybridWaterCar(1,1,1);
+        c1.showCurrentGauge();
     }
 }
