@@ -6,8 +6,36 @@
  * 코드를 수정해야 한다. 즉 필요하다면 메소드의 이름을 수정해야 한다.
  */
 
+class Box {
+    public void wrap() {
+        System.out.println("Simple Wrapping");
+    }
+}
+
+class PaperBox extends Box {
+    public void wrap() {
+        System.out.println("Paper Wrapping");
+    }
+}
+
+class GoldPaperBox extends PaperBox {
+    public void wrap() {
+        System.out.println("Gold Wrapping");
+    }
+}
+
 public class Answer01 {
     public static void main(String[] args) {
+        Box box1 = new Box();
+        PaperBox box2 = new PaperBox();
+        GoldPaperBox box3 = new GoldPaperBox();
 
+        wrapBox(box1);
+        wrapBox(box2);
+        wrapBox(box3);
+    }
+
+    public static void wrapBox(Box box) {
+        box.wrap();
     }
 }
