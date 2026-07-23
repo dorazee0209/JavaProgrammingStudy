@@ -28,14 +28,14 @@ public class P346_Wrapping {
     }
 
     public static void wrapBox(Box box) {
-        if(box instanceof Box) {
-            box.simpleWrap();
+        if(box instanceof GoldPaperBox) {
+            ((GoldPaperBox)box).goldWrap();
         }
         else if (box instanceof PaperBox) {
             ((PaperBox)box).paperWrap();
         }
         else {
-
+            box.simpleWrap();
         }
     }
 }
