@@ -2,7 +2,7 @@ class Cake {
     public int size;
 
     public Cake(int size) {
-        this.size = size;
+        this.size = size; // Cake size
     }
 
     public void showCakeSize() {
@@ -11,7 +11,7 @@ class Cake {
 }
 
 class CheeseCake extends Cake {
-    public int size;
+    public int size; // Cheese size
 
     public CheeseCake(int sz, int size) {
         super(sz);
