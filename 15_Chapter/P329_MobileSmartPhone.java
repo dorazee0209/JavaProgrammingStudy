@@ -18,7 +18,7 @@ class SmartPhone extends MobilePhone {
         androidVer = ver;
     }
 
-    public void palyApp() {
+    public void playApp() {
         System.out.println("App is running in " + androidVer);
     }
 }
@@ -27,7 +27,7 @@ public class P329_MobileSmartPhone {
     public static void main(String[] args) {
         SmartPhone phone = new SmartPhone("010-123", "Nougat");
         phone.answer();
-        phone.palyApp();
+        phone.playApp();
     }
 }
 
