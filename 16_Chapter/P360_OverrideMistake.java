@@ -12,7 +12,7 @@ class ChildAdder extends ParentAdder {
     }
 }
 
-public class P359_OverrideMistake {
+public class P360_OverrideMistake {
     public static void main(String[] args) {
         ParentAdder adder = new ChildAdder();
         System.out.println(adder.add(3, 4));

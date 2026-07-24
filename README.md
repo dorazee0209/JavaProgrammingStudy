@@ -26,7 +26,7 @@
 - [x] Chapter 13 - 배열(Array) (p283-310)
 - [x] Chapter 14 - 클래스의 상속 1: 상속의 기본 (p311-326)
 - [x] Chapter 15 - 클래스의 상속 2: 오버라이딩 (p327-348)
-- [ ] Chapter 16 - 클래스의 상속 3: 상속의 목적 (p349-360)
+- [x] Chapter 16 - 클래스의 상속 3: 상속의 목적 (p349-360)
 - [ ] Chapter 17 - 인터페이스와 추상 클래스 (p361-382)
 - [ ] Chapter 18 - 예외처리(Exception Handling) (p383-414)
 - [ ] Chapter 19 - 자바의 메모리 모델과 Object 클래스 (p415-440)
