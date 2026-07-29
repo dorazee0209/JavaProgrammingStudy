@@ -14,6 +14,7 @@
 | 5 | `Throwable` 클래스와 예외처리의 책임 전가 | `P394_ExceptionMessage.java`, `P395_ExceptionMessage2.java` |
 | 6 | 예외 클래스의 구분 (3분류) | `P396`, `P397`, `P398` |
 | 7 | `Exception`을 상속하는 예외의 처리 **의무** | `P401_IOExceptionCase.java` |
+| 8 | `finally` 구문 | (`FinallyCase`, p410 예정) |
 
 ---
 
@@ -342,6 +343,54 @@ public static BufferedWriter newBufferedWriter(Path path, OpenOption... options)
 
 ---
 
+# 8. finally 구문
+
+`try ~ catch`문에는 **`finally`** 블록을 추가로 붙일 수 있다.
+
+```java
+try {
+    ...
+}
+catch(IOException e) {
+    e.printStackTrace();
+}
+finally {
+    ...
+}
+```
+
+> 📌 **실행의 흐름이 `try` 안으로 들어오면 `finally` 구문은 반드시 실행된다.**
+
+즉 try 영역에서 예외가 발생하든 안 하든, catch에서 예외를 처리하든 안 하든 **무조건 실행**되는 영역이다.
+그래서 파일을 닫는 `close()`처럼 **예외 발생 여부와 무관하게 꼭 실행되어야 하는 마무리 작업**을 넣기에 적합하다.
+
+## finally 안에서도 예외처리가 필요할 수 있다
+
+그런데 `close()` 메소드의 호출문에서도 `IOException` 예외가 발생할 수 있기 때문에, `finally` 블록 안에 `close()`를 그냥 넣으면 **컴파일 오류**가 발생한다.
+따라서 `finally` 구문을 다음과 같이 수정해야 한다. (코드가 복잡해지더라도 어쩔 수 없다.)
+
+```java
+catch(IOException e) {
+    e.printStackTrace();
+}
+finally {
+    try {
+        if(writer != null)
+            writer.close();    // IOException 발생 가능
+    }
+    catch(IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+이렇듯 **`finally` 내에서도 `try ~ catch`문을 작성할 수 있으며, 이 상황에서 이는 선택이 아니라 필수다.**
+(`close()`가 `IOException`을 던질 수 있는 메소드이기 때문 — [7번 항목](#7-exception을-상속하는-예외-클래스의-예외처리)에서 본 "의무" 규칙이 그대로 적용된다.)
+
+> 💡 실제로 이러한 코드 구성이 이전에는 최선이었다. 그러나 **자바 7에서 `try-with-resources`문**이 등장하면서 이 문장의 구성이 한결 단순해졌다.
+
+---
+
 # 📌 정리
 
 | 핵심 | 내용 |
@@ -353,3 +402,4 @@ public static BufferedWriter newBufferedWriter(Path path, OpenOption... options)
 | **여러 예외** | catch를 나열하거나, `catch(A \| B e)`로 묶기 |
 | **최상위** | 모든 예외의 조상은 `java.lang.Throwable` |
 | **3분류** | `Error`(처리 불가) / `Exception`(처리 의무) / `RuntimeException`(처리 선택) |
+| **finally** | try 진입 시 **무조건 실행** — 마무리 작업(`close()` 등)에 사용, 내부에 예외 발생 가능성이 있으면 **자체 try~catch 필요** |
