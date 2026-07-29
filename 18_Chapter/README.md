@@ -102,3 +102,39 @@ catch(ArithmeticException | InputMismatchException e) {
 
 System.out.println("Good bye~~!");
 ```
+
+## Throwable 클래스와 예외처리의 책임 전가
+자바의 최상위 클래스인 `java.lang.Object`를 제외하고, 예외 클래스의 최상위 클래스는 다음과 같다.
+
+```
+java.lang.Throwable        예외 클래스의 최상위 클래스
+```
+
+이 클래스에는 발생한 예외의 정보를 알 수 있는 메소드가 정의되어 있는데, 대표적인 메소드 둘은 다음과 같다.
+
+| 메소드 | 설명 |
+|---|---|
+| `public String getMessage()` | 예외의 **원인**을 담고 있는 문자열을 반환 |
+| `public void printStackTrace()` | 예외가 발생한 **위치**와 **호출된 메소드**의 정보를 출력 |
+
+### 넘어오는 예외를 처리하기
+`md1`으로부터 넘어오는 예외를 처리하려면, **`md1`의 호출문을 `try ~ catch`문으로 감싸면 된다.**
+
+```java
+try {
+    md1(3);     // md1으로부터 예외가 넘어온다.
+}
+catch(Throwable e) {
+    e.printStackTrace();
+}
+```
+
+- 그런데 실제 넘어오는 예외는 `Throwable`이 아니다.
+- 그러나 **모든 예외 클래스는 `Throwable`을 상속**하므로, 상속 관계에 의해 `md2`에서 발생한 예외를 위와 같이 처리할 수도 있다.
+
+> ⚠️ **단, 이는 좋은 예외처리의 예는 아니다.**
+
+### 실행 결과에서 확인할 수 있는 것
+- 예외가 처리되고 나니 **`try ~ catch`문 다음에 위치한 문장이 실행**된다.
+- catch 구문에서 호출한 `printStackTrace` 메소드의 출력 내용은, 앞서 **가상머신이 예외를 처리할 때 출력한 문장과 유사**하다.
+- 사실 가상머신도 예외의 처리 과정에서 프로그램을 종료하기 전에 예외 인스턴스의 `printStackTrace` 메소드를 호출한다.
