@@ -138,3 +138,115 @@ catch(Throwable e) {
 - 예외가 처리되고 나니 **`try ~ catch`문 다음에 위치한 문장이 실행**된다.
 - catch 구문에서 호출한 `printStackTrace` 메소드의 출력 내용은, 앞서 **가상머신이 예외를 처리할 때 출력한 문장과 유사**하다.
 - 사실 가상머신도 예외의 처리 과정에서 프로그램을 종료하기 전에 예외 인스턴스의 `printStackTrace` 메소드를 호출한다.
+
+## 예외 클래스의 구분
+예외 클래스의 최상위 클래스가 `Throwable`임은 앞서 설명하였다.
+그런데 이를 상속하는 예외 클래스는 다음과 같이 **세 부류**로 나뉜다.
+
+- `Error` 클래스를 상속하는 예외 클래스
+- `Exception` 클래스를 상속하는 예외 클래스
+- `RuntimeException` 클래스를 상속하는 예외 클래스
+  - → `RuntimeException` 클래스는 `Exception` 클래스를 상속한다.
+
+```
+java.lang.Object
+  └ java.lang.Throwable
+      ├ java.lang.Error                  ①
+      └ java.lang.Exception              ②
+           └ java.lang.RuntimeException  ③
+```
+
+### ① Error 클래스를 상속하는 예외
+| 예외 클래스 | 발생 상황 |
+|---|---|
+| `VirtualMachineError` | 가상머신에 심각한 오류 발생 |
+| `IOError` | 입출력 관련해서 코드 수준 복구가 불가능한 오류 발생 |
+
+자바 프로그램이 파일에 저장된 데이터를 읽는 중에 갑자기 하드디스크에 물리적 오류가 발생하여
+더 이상 데이터를 읽을 수 없는 상황이 생길 수 있다. 이러한 수준의 상황에서 발생하는 것이 `IOError` 예외이다.
+
+> ⚠️ **`Error` 클래스를 상속하는 예외는 처리의 대상이 아니다.**
+> 바꾸어 말하면 **처리할 수 있는 예외가 아니다.** 따라서 이런 유형의 예외가 발생하면
+> 그냥 프로그램이 종료되도록 놔두고, 이후에 원인을 파악하는 과정이 이어져야 한다.
+
+우리가 흔히 보는 `StackOverflowError`, `OutOfMemoryError`가 바로 `VirtualMachineError`의 자식이다.
+
+```
+StackOverflowError ↑ VirtualMachineError ↑ Error ↑ Throwable
+OutOfMemoryError   ↑ VirtualMachineError ↑ Error ↑ Throwable
+IOError                                  ↑ Error ↑ Throwable
+```
+
+### ② Exception 클래스를 상속하는 예외
+`RuntimeException` 계열을 제외한 나머지로, **처리하지 않으면 컴파일이 되지 않는다.**
+
+| 예외 클래스 | 발생 상황 |
+|---|---|
+| `IOException` | 입출력 과정에서 문제 발생 |
+| `FileNotFoundException` | 열려는 파일이 존재하지 않음 |
+| `ClassNotFoundException` | 찾으려는 클래스가 존재하지 않음 |
+
+### ③ RuntimeException 클래스를 상속하는 예외
+**앞서 보였던 모든 예외 클래스가 바로 이 예외에 해당한다.**
+자바에서 발생시키는 예외의 종류는 다양하며, 그 수만큼 예외 클래스도 다양하게 정의되어 있다.
+
+- `ArithmeticException`
+- `ClassCastException`
+- `IndexOutOfBoundsException`
+- `NegativeArraySizeException` — 배열 생성 시 길이를 음수로 지정하는 예외의 발생
+- `NullPointerException`
+- `ArrayStoreException` — 배열에 적절치 않은 인스턴스를 저장하는 예외의 발생
+
+#### 배열 관련 예외
+| 예외 클래스 | 발생 상황 | 실제 메시지 예 |
+|---|---|---|
+| `ArrayIndexOutOfBoundsException` | 배열의 범위를 벗어난 인덱스 접근 | `Index 5 out of bounds for length 3` |
+| `NegativeArraySizeException` | 배열 생성 시 길이를 음수로 지정 | `-1` |
+| `ArrayStoreException` | 배열에 적절치 않은 인스턴스를 저장 | `java.lang.Integer` |
+
+#### 그 외 자주 만나는 예외
+| 예외 클래스 | 발생 상황 | 실제 메시지 예 |
+|---|---|---|
+| `NullPointerException` | `null`인 참조변수로 멤버에 접근 | `Cannot invoke "String.length()" because "s" is null` |
+| `ClassCastException` | 허용되지 않는 형변환(다운캐스팅) 시도 | `class java.lang.String cannot be cast to class java.lang.Integer` |
+| `ArithmeticException` | **정수**를 0으로 나눔 | `/ by zero` |
+| `NumberFormatException` | 숫자로 바꿀 수 없는 문자열을 변환 | `For input string: "abc"` |
+| `StringIndexOutOfBoundsException` | 문자열의 범위를 벗어난 인덱스 접근 | `Index 10 out of bounds for length 3` |
+| `InputMismatchException` | `Scanner` 입력이 기대한 타입과 불일치 | `null` |
+| `IndexOutOfBoundsException` | 컬렉션(`List` 등)의 범위를 벗어난 접근 | `Index 0 out of bounds for length 0` |
+| `UnsupportedOperationException` | 지원하지 않는 연산 요청(예: 불변 리스트 수정) | `null` |
+
+> ⚠️ `getMessage()`가 항상 내용을 담고 있는 것은 아니다. `InputMismatchException`처럼 **`null`을 반환**하는 경우도 있다.
+
+> 💡 **0으로 나누기는 정수일 때만 예외다.**
+> 실수 연산은 예외 없이 특수한 값을 반환한다 — `3.0 / 0.0` → `Infinity`, `0.0 / 0.0` → `NaN`
+
+위 표의 예외는 **모두 `RuntimeException`의 자손**이다. 다만 바로 아래 자식인 것도 있고, 중간 단계를 거치는 것도 있다.
+
+```
+ArithmeticException             ↑ RuntimeException
+ArrayIndexOutOfBoundsException  ↑ IndexOutOfBoundsException ↑ RuntimeException
+StringIndexOutOfBoundsException ↑ IndexOutOfBoundsException ↑ RuntimeException
+NumberFormatException           ↑ IllegalArgumentException  ↑ RuntimeException
+InputMismatchException          ↑ NoSuchElementException    ↑ RuntimeException
+```
+
+## 보충 — Checked 예외와 Unchecked 예외
+위 ②와 ③을 부르는 다른 이름이며, **처리를 강제하느냐**로 나눈 것이다.
+
+| 구분 | Checked 예외 | Unchecked 예외 |
+|---|---|---|
+| 위치 | `Exception`의 자식 (단, `RuntimeException` 계열 제외) | `RuntimeException`의 자식 |
+| 처리 | **컴파일러가 강제** | 강제하지 않음 |
+| 안 하면 | **컴파일 에러** | 컴파일은 통과, 실행 중 종료 |
+| 성격 | 외부 환경 문제 (파일 없음, 네트워크 끊김) | 프로그래머의 실수 (`null` 참조, 범위 초과) |
+| 예 | `IOException`, `FileNotFoundException` | `NullPointerException`, `ArithmeticException` |
+
+Checked 예외를 처리하지 않으면 실행조차 못 해본다.
+
+```
+error: unreported exception FileNotFoundException;
+       must be caught or declared to be thrown
+```
+
+> 📌 이 장에서 다룬 예외들은 **모두 Unchecked 예외**다. 그래서 `try ~ catch` 없이도 컴파일이 되었던 것이다.
