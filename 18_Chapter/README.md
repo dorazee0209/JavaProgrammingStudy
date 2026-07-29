@@ -231,6 +231,43 @@ NumberFormatException           ↑ IllegalArgumentException  ↑ RuntimeExcepti
 InputMismatchException          ↑ NoSuchElementException    ↑ RuntimeException
 ```
 
+## Exception을 상속하는 예외 클래스의 예외처리
+
+`try ~ catch`문을 **지워서 예외처리를 생략한 것뿐인데 컴파일 오류가 발생**한다.
+그것도 `IOException` 예외 발생이 가능한 문장 — 정확히는 **예외 발생 가능성이 있는 '메소드 호출문'** 에서 오류가 난다.
+
+```
+error: unreported exception IOException; must be caught or declared to be thrown
+        writer = Files.newBufferedWriter(file);
+                                        ^
+```
+
+### 처리가 '선택'인 예외 vs '의무'인 예외
+| 상속 대상 | 예외처리 | 안 하면 |
+|---|---|---|
+| `Error` 계열 | **선택** | 컴파일 O |
+| `RuntimeException` 계열 | **선택** | 컴파일 O |
+| `Exception` 계열 (단, `RuntimeException` 제외) | **의무** | ❌ **컴파일 오류** |
+
+즉 `Exception`을 상속하지만 `RuntimeException`은 상속하지 않는 예외는,
+**`try ~ catch`문으로 처리**하거나 **다른 영역으로 넘긴다고 반드시 명시**해야 한다.
+
+### 왜 '메소드 호출문'에서 오류가 날까
+예외를 실제로 던지는 쪽은 내가 쓴 문장이 아니라 **내가 호출한 메소드**다.
+그 메소드가 자기 선언부에 "나는 이 예외를 던질 수 있다"고 **미리 명시**해 두었기 때문에,
+컴파일러가 호출한 쪽을 보고 "그럼 너는 이걸 어떻게 할 건데?"라고 묻는 것이다.
+
+```java
+// java.nio.file.Files 의 실제 선언
+public static BufferedWriter newBufferedWriter(Path path, OpenOption... options)
+        throws IOException     // ← 이 표시 때문에 호출한 쪽이 처리를 강제받는다
+```
+
+> 💡 **선택지는 두 개뿐** — ① `try ~ catch`로 **직접 처리**하거나, ② `throws`로 **책임을 넘기거나**.
+> ②는 앞서 본 "예외처리의 책임 전가"와 같은 이야기다.
+
+> 🔤 **`unreported`** = "보고되지 않은". 컴파일러 입장에선 예외를 처리하든 넘기든 **의사 표시(report)** 를 하라는 뜻이다.
+
 ## 보충 — Checked 예외와 Unchecked 예외
 위 ②와 ③을 부르는 다른 이름이며, **처리를 강제하느냐**로 나눈 것이다.
 
