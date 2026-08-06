@@ -1,4 +1,5 @@
 .DS_Store
+*.swp
 .omc/
 *.class
 열혈Java_훑어보기.md
