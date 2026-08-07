@@ -73,6 +73,9 @@ public static void simpleMethod() {
     String str1 = new String("My String");
     String str2 = new String("Your String");
     ....
+    str1 = null;    // 참조 관계 소멸
+    str2 = null;    // 참조 관계 소멸
+    ....
 }
 ```
 
@@ -85,20 +88,7 @@ str2(참조변수) ──참조──▶ "Your String"(인스턴스)
 ```
 
 #### 자바 가상머신의 인스턴스 소멸시기 — 가비지 컬렉션(Garbage Collection)
-힙에 생성된 인스턴스의 소멸시기는 가상머신이 결정한다.
-
-```java
-public static void simpleMethod() {
-    String str1 = new String("My String");
-    String str2 = new String("Your String");
-    ....
-    str1 = null;    // 참조 관계 소멸
-    str2 = null;    // 참조 관계 소멸
-    ....
-}
-```
-
-`str1`, `str2`에 `null`을 대입하면, 이 둘이 참조하던 두 String 인스턴스는 **어느 참조변수로부터도 참조되지 않는 상태**가 된다. 이런 상태의 인스턴스는 더 이상 접근할 수 없어 존재할 이유가 없으므로 '소멸의 대상'이 되어 가상머신에 의해 소멸된다.
+힙에 생성된 인스턴스의 소멸시기는 가상머신이 결정한다. 위 코드에서 `str1`, `str2`에 `null`을 대입하면, 이 둘이 참조하던 두 String 인스턴스는 **어느 참조변수로부터도 참조되지 않는 상태**가 된다. 이런 상태의 인스턴스는 더 이상 접근할 수 없어 존재할 이유가 없으므로 '소멸의 대상'이 되어 가상머신에 의해 소멸된다.
 
 지금까지 설명한 자바의 인스턴스 소멸 방식을 가리켜 **가비지 컬렉션(Garbage Collection)**이라 하며, 이는 프로그래밍의 편의를 돕는 자바의 매우 특별한 기능이다.
 
@@ -113,79 +103,14 @@ public static void simpleMethod() {
 
 `Object` 클래스는 모든 자바 클래스의 최상위 클래스다.
 
-### 🔬 실측 — Object가 가진 메소드 전부 (OpenJDK 26)
-
-모든 클래스가 물려받는 `Object`의 구성원은 **생성자 1개 + 메소드 11개**가 전부다. 다음 명령으로 직접 확인할 수 있다.
-
-```bash
-javap java.lang.Object
-```
-
-| 메소드 | 매개변수형 | 반환형 | 접근제어자 | 암기 시점 |
-|---|---|---|---|---|
-| `Object()` | — | — | `public` | — (생성자) |
-| `getClass()` | — | `Class<?>` | `public final` | 🔍 필요할 때 |
-| `hashCode()` | — | `int` | `public` | ⭐ 지금 |
-| `equals(Object)` | `Object` | `boolean` | `public` | ⭐ 지금 |
-| `clone()` | — | `Object` | `protected` | 🔍 필요할 때 |
-| `toString()` | — | `String` | `public` | ⭐ 지금 |
-| `notify()` | — | `void` | `public final` | 🔜 34-2 |
-| `notifyAll()` | — | `void` | `public final` | 🔜 34-2 |
-| `wait()` | — | `void` | `public final` | 🔜 34-2 |
-| `wait(long)` | `long` | `void` | `public final` | 🔜 34-2 |
-| `wait(long, int)` | `long, int` | `void` | `public final` | 🔜 34-2 |
-| `finalize()` | — | `void` | `protected` | 📖 19장 개념용 |
-
-**암기 시점 범례**
-
-| 표시 | 의미 |
-|---|---|
-| ⭐ **지금** | 이번 장에서 오버라이딩을 직접 연습하는 3인방. 실무에서도 가장 자주 재정의한다 |
-| 🔜 **34-2** | `Chapter 34-2. 쓰레드의 동기화`(882p)에서 한 세트로 다시 나온다. 지금은 이름과 존재만 기억 |
-| 🔍 **필요할 때** | 리플렉션(`getClass`)·객체 복제(`clone`)처럼 특정 상황에서만 등장 |
-| 📖 **19장 개념용** | 이번 장의 학습 주제이긴 하나 제거 예정이라 실무 암기 가치는 낮다 |
-
-### 시그니처에 딸린 표시들
-
-`javap` 출력에는 표에 담기지 않은 키워드가 함께 붙는다.
-
-| 표시 | 의미 | 해당 메소드 |
-|---|---|---|
-| `native` | 자바가 아닌 **JVM(C/C++)으로 구현**된 메소드 | `getClass`, `hashCode`, `clone`, `notify`, `notifyAll` |
-| `throws CloneNotSupportedException` | 복제를 허용하지 않는 클래스면 예외 | `clone` |
-| `throws InterruptedException` | 대기 중 다른 쓰레드가 깨우면 예외 | `wait` 3종 |
-| `throws Throwable` | 어떤 예외든 던질 수 있음 | `finalize` |
-
-### final이 붙은 6개는 오버라이딩할 수 없다
-
-`getClass`, `notify`, `notifyAll`, `wait` 3종 — 이 **6개는 `final`** 이라 하위 클래스가 재정의할 수 없다.
-
-- JVM의 클래스 정보 조회와 쓰레드 동기화의 핵심 동작이라, 하위 클래스가 임의로 바꾸면 언어의 기반이 무너지기 때문이다.
-- 16-2에서 배운 "`final` 선언으로 오버라이딩을 막는다"가 자바 표준 라이브러리에 그대로 적용된 사례다.
-
-### ⭐ 지금 외울 3개 — equals · hashCode · toString
-
-이 셋은 `final`이 아니라 오버라이딩이 자유롭고, 실무에서 가장 자주 재정의하는 메소드다.
-
-| 메소드 | 오버라이딩하는 이유 |
-|---|---|
-| `toString()` | 기본 출력이 `클래스명@해시코드`라 알아보기 힘들다. 디버깅·로그에서 읽기 좋게 바꾼다 |
-| `equals()` | 기본은 **참조(주소) 비교**라, `new`로 만든 두 인스턴스는 내용이 같아도 무조건 '다름'이다. "내용이 같으면 같다"로 바꾼다 |
-| `hashCode()` | `equals()`를 오버라이딩했다면 **반드시 같이** 오버라이딩해야 한다 |
-
-> **💡 개발 팁 — equals와 hashCode는 한 쌍이다**
-> `HashMap`, `HashSet` 같은 컬렉션은 "`equals`로 같다고 판단된 두 객체는 반드시 같은 `hashCode`를 가진다"는 **계약(contract)** 위에서 동작한다. 둘 중 하나만 오버라이딩하면, 분명히 넣어둔 값을 컬렉션에서 못 찾는 미묘한 버그가 생긴다. (컬렉션은 23장에서 배운다)
-
-> 🔤 **영어 한 스푼** — `native` = 태생의·토박이의(`native speaker` = 원어민). `native` 메소드란 자바가 아닌 **그 플랫폼 태생의 언어로 구현된** 메소드라는 뜻이다. · `notify` = 알리다 · `clone` = 복제하다 · `hash` = 잘게 다지다(음식 '해시브라운'의 그 hash) → 데이터를 잘게 섞어 고정 길이 숫자로 만드는 것이 해시다.
-
-### 인스턴스 소멸 시 해야 할 일이 있다면: finalize 메소드
+### 인스턴스 소멸 시 해야 할 일이 있다면: finalize 메소드 — 예제 `P423_ObjectFinalize`
 `Object` 클래스에는 다음 메소드가 정의되어 있다. 아무도 참조하지 않는 인스턴스가 가비지 컬렉션에 의해 소멸되기 전에 **자동으로 호출되는** 메소드다.
 
 ```java
 protected void finalize() throws Throwable
 ```
 
-따라서 인스턴스 소멸 시 반드시 실행해야 할 코드가 있다면 이 메소드의 오버라이딩을 고려할 수 있다. (예제 `P423_ObjectFinalize`)
+따라서 인스턴스 소멸 시 반드시 실행해야 할 코드가 있다면 이 메소드의 오버라이딩을 고려할 수 있다.
 
 ### super.finalize()를 호출하는 이유
 ```java
@@ -226,159 +151,231 @@ protected void finalize() throws Throwable {
 > **참고 — 가비지 컬렉션을 강제로 진행하지 말자**
 > 가상머신은 매우 합리적인 방법으로 가비지 컬렉션을 수행한다. 따라서 특별한 상황이 아니면 가비지 컬렉션 동작에 영향을 미치는 메소드 호출을 삼가는 것이 좋다.
 
-### 🔬 실측 보충 — JDK 26에서는 경고가 뜬다
-`P423_ObjectFinalize.java`를 OpenJDK 26에서 컴파일하면 다음이 출력된다.
+### 내용 비교를 위한 equals 오버라이딩 — 예제 `P425_ObjectEquality`
 
-```
-warning: [removal] finalize() in Object has been deprecated and marked for removal
-2 warnings
-```
-
-**이것은 오류가 아니다.** 맨 끝이 `errors`가 아니라 `warnings`이며, 컴파일도 실행도 정상으로 끝난다.
-
-| | error (오류) | warning (경고) |
-|---|---|---|
-| 컴파일 | ❌ 중단 | ⭕️ 성공 |
-| 실행 | 불가능 | 정상 |
-| 의미 | "문법이 틀렸다" | "되긴 하는데, 곧 없어질 기능이다" |
-
-출력이 `end of program` 한 줄뿐인 것도 교재와 **동일한 정상 결과**다 — `System.gc()`가 주석 처리되어 있어 가비지 컬렉션이 돌지 않았기 때문이다.
-
-**주석을 풀고 5번 실행해보면** 교재가 말한 "요청일 뿐"이라는 성격이 그대로 드러난다.
-
-| 실행 | 출력 |
-|---|---|
-| 1·2·4·5회 | `destroyed: Yoon` → `destroyed: Kim` → `EOP` |
-| 3회 | `destroyed: Kim` → `destroyed: Yoon` → `EOP` (**순서 뒤바뀜**) |
-| 별도 실행 | `destroyed: Yoon` → `EOP` (**하나는 아예 누락**) |
-
-같은 코드인데 실행할 때마다 결과가 다르다. `finalize`는 **호출 시점도, 호출 여부도, 호출 순서도 보장되지 않는다.**
-
-#### finalize가 폐기 수순을 밟는 이유
-자바 18(JEP 421)부터 `finalize()`는 *deprecated for removal*(제거 예정) 상태다. 이유는 위 실측 결과와 정확히 겹친다.
-
-- ⏰ 호출 시점·여부가 보장되지 않는다
-- 🐌 `finalize`를 가진 객체는 가비지 컬렉션이 최소 2사이클을 돌아야 해 성능이 나빠진다
-- 🤫 `finalize` 안에서 발생한 예외는 조용히 무시된다
-- 🔓 생성자에서 예외를 던져도 `finalize`가 호출되어, 반쯤 만들어진 객체가 살아남는 보안 취약점(*finalizer attack*)이 있다
-
-JDK 26에는 아예 기능을 끄는 실행 옵션도 있다.
-
-```bash
-java --finalization=disabled ClassName   # finalize 호출 자체가 사라짐
-```
-
-> **그럼 리소스 정리는 무엇으로 하나?** → **18장의 `try-with-resources` + `AutoCloseable`**.
-> `finalize`가 "언젠가 알아서 정리해주겠지"라면, `try-with-resources`는 블록을 벗어나는 **즉시 반드시** `close()`를 호출한다. 18장에서 배운 그 구문이 바로 이 실패한 `finalize` 방식을 대체하기 위해 등장한 것이다.
-
-> 🔤 **영어 한 스푼** — `finalize` = 마무리 짓다 · `deprecate` = (기능을) 앞으로 쓰지 말라고 표시하다(원뜻은 '비난하다') · `marked for removal` = 제거 예정으로 표시됨. `deprecated`보다 한 단계 강한 경고로, 정말 삭제할 예정이라는 뜻이다.
-
-### 내용 비교를 위한 equals 오버라이딩 (p425)
-
-`Object`의 `equals`는 기본적으로 **참조 값(주소)을 비교**한다. 따라서 "내용이 같으면 같다"로 판단하게 하려면 오버라이딩해야 한다. (예제 `P425_ObjectEquality`)
+`Object`의 `equals`는 기본적으로 **참조 값(주소)을 비교**한다. 따라서 "내용이 같으면 같다"로 판단하게 하려면 오버라이딩해야 한다.
 
 ```java
 public boolean equals(Object obj)      // Object가 제공하는 원본 시그니처
 ```
 
-### 🔬 실측 — equals의 매개변수는 왜 하필 Object인가
+### 인스턴스 복사(복제): clone 메소드
 
-"매개변수를 `Point`로 바꾸면 캐스팅도 필요 없고 편할 텐데?"라는 생각이 자연스럽게 든다. 실제로 해보면 이렇게 된다.
+`Object` 클래스에는 인스턴스의 복사를 위한 다음 메소드가 정의되어 있다.
+
+```java
+protected Object clone() throws CloneNotSupportedException
+```
+
+이 메소드가 호출되면 **호출된 메소드가 속한 인스턴스의 복사본이 생성되고, 그 복사본의 참조 값이 반환**된다. 단, 다음 인터페이스를 구현한 인스턴스를 대상으로만 호출할 수 있다.
+
+```java
+interface Cloneable
+```
+> → 이 인터페이스를 구현한 클래스의 인스턴스만 `clone` 메소드 호출 가능
+
+`Cloneable`을 구현하지 않은 클래스의 인스턴스를 대상으로 `clone`을 호출하면 `CloneNotSupportedException` 예외가 발생한다.
+
+### 마커 인터페이스(Marker Interface)
+
+그렇다면 `Cloneable` 인터페이스의 구현에는 어떤 의미가 있을까?
+
+> "이 클래스의 인스턴스는 복사해도 됩니다. 즉 clone 메소드 호출이 가능합니다."
+
+사실 `Cloneable`은 **마커 인터페이스(Marker Interface)** 다. 즉 **정의해야 할 메소드가 존재하지 않는**, "복사를 해도 된다"는 **표식**의 인터페이스다.
+
+- 인스턴스의 복사는 클래스에 따라 **허용해서는 안 되는 작업**이 될 수 있다.
+- 따라서 인스턴스 복사의 허용 여부는 **클래스를 정의하는 과정에서 고민하고 결정**해야 한다.
+- 복사를 허용해도 된다는 결론이 나오면 `Cloneable`을 구현해서 `clone` 호출이 가능하도록 하면 된다.
+
+### clone에 의한 인스턴스 복사 — 예제 `P429_InstanceCloning`
+
+**[그림 19-8: clone 호출에 의한 인스턴스 복사]**
+
+```
+스택 영역                     힙 영역
+org(참조변수) ──참조──▶ [ xPos = 3, yPos = 5 ]  인스턴스
+                                    │ clone에 의한 복사
+                                    ▼
+cpy(참조변수) ──참조──▶ [ xPos = 3, yPos = 5 ]  인스턴스
+```
+
+`clone` 호출로 **힙에 인스턴스가 하나 더 생기고**, 그 참조 값이 `cpy`에 저장된다. 즉 `org`와 `cpy`는 내용은 같지만 **서로 다른 인스턴스**를 참조한다.
+
+### clone을 오버라이딩하는 이유 — 접근 범위 확대
+
+예제에서는 `clone`을 다음과 같이 오버라이딩했다. 내용을 보면 상위 클래스, 즉 `Object`의 `clone`을 호출한 것이 전부라 **언뜻 보면 오버라이딩이 무의미해 보인다.**
 
 ```java
 @Override
-public boolean equals(PointA obj) { ... }    // 매개변수를 Object → PointA 로 변경
-```
-
-```
-error: equals(PointA) in PointA does not override or implement a method from a supertype
-    @Override
-    ^
-```
-
-**`@Override`가 스스로 에러를 낸다.** 오버라이딩은 **매개변수 타입까지 부모와 100% 일치**해야 성립하기 때문이다. 매개변수를 바꾸는 순간 그것은 재정의가 아니라 **11-1에서 배운 오버로딩**(이름만 같은 별개의 새 메소드)이 된다.
-
-| | 매개변수 `Object` | 매개변수 `Point` |
-|---|---|---|
-| 부모(`Object`)의 `equals`와의 관계 | **오버라이딩** (재정의) | **오버로딩** (남남인 새 메소드) |
-| `@Override` 부착 | ⭕️ 정상 | ❌ 컴파일 에러 |
-| 다형성 적용 (`Object` 참조로 호출 시) | ⭕️ 내가 만든 버전이 실행됨 | ❌ `Object`의 원본이 실행됨 |
-
-> **결론**: `equals`를 제대로 오버라이딩하려면 매개변수는 **반드시 `Object`여야 한다.** 캐스팅의 번거로움은 그 대가다.
-
-### 🔬 실측 — 그 대가: 메소드 안에서 내 클래스 기능이 안 보인다
-
-매개변수가 `Object`이므로, 메소드 몸통에서 내 클래스에만 있는 기능을 부르면 막힌다.
-
-```java
-public boolean equals(Object obj) {
-    ... obj.getter() ...        // Point에 정의한 메소드 호출 시도
+public Object clone() throws CloneNotSupportedException {
+    return super.clone();
 }
 ```
 
+그러나 중요한 차이가 있다. `Object`의 `clone`은 원래 이렇게 정의되어 있다.
+
+```java
+protected Object clone() throws CloneNotSupportedException
 ```
-error: cannot find symbol
-  symbol:   method getter()
-  location: variable obj of type Object
-```
 
-원인은 자바의 정적 타입 검사 원칙이다.
+즉 **`protected`로 선언되어 있던 것을 오버라이딩하여 `public`으로 바꿔준 것**이고, 이것이 오버라이딩을 한 이유다.
 
-> **컴파일러는 참조변수가 "실제로 무엇을 참조하는지"가 아니라, "어떤 타입으로 선언되었는지"만 보고 판단한다.**
+> **메소드 오버라이딩을 통해서 접근 범위를 넓히는 것이 가능하다.**
 
-`instanceof`로 런타임에 "얘는 `Point`가 맞다"를 확인해 두어도, **컴파일러의 판단은 그것으로 바뀌지 않는다.**
-
-### ⭐ 컴파일러의 두 관문
-
-`obj.멤버` 형태의 코드는 **두 개의 문**을 순서대로 통과해야 한다. 지금까지의 모든 에러가 이 둘 중 하나다.
-
-| | 질문 | 무엇이 기준인가 | 통과 못하면 |
-|---|---|---|---|
-| **1문 — 존재 확인** | "이 이름이 참조변수의 **선언된 타입**에 있는가?" | 타입 (다운캐스팅으로 바꿀 수 있음) | `cannot find symbol` |
-| **2문 — 자격 확인** | "이 코드가 그 이름을 만질 **자격**이 있는 위치인가?" | 접근제어자 (`private`/`public` …) | `has private access` |
-
-**두 관문은 완전히 독립적**이다. 하나를 열어도 다른 하나는 열리지 않는다.
-
-### 1문 — 심볼(symbol)이란
-
-**심볼**은 컴파일러가 다루는 **"이름이 붙은 대상"** 전부를 가리키는 용어다 (변수·메소드·필드·클래스 이름). 컴파일러는 타입마다 "이 타입에는 어떤 이름이 있다"는 목록(**symbol table**)을 갖고, 거기서 이름을 찾는다.
-
-1문의 유일한 기준은 **"`Object` 클래스가 그 이름을 원래부터 갖고 있었는가"** 이며, `public`/`private` 여부와는 **아무 상관이 없다.**
-
-| | `equals(Object)` | `getter()` |
-|---|---|---|
-| `Object`에 원래 있는 이름인가 | ⭕️ 있음 | ❌ 없음 |
-| `Point`에서 한 일 | 기존 것을 **재정의**(오버라이딩) | **새로 추가** (오버라이딩 아님) |
-| `@Override` 부착 | ⭕️ 정상 | ❌ `does not override ... from a supertype` |
-| `Object obj`로 캐스팅 없이 호출 | ⭕️ 가능 | ❌ `cannot find symbol` |
-
-- `equals`는 `Object`의 목록에 원래 있는 이름이라, `Object` 타입 참조로도 **항상 호출 가능**하다. 이때 실행되는 것은 하위 클래스가 재정의한 버전이다 (15장 다형성/동적 바인딩).
-- `getter`는 `Object`가 **모르는 이름**이라 원천적으로 안 보인다. `public`으로 만들어도 마찬가지다.
-
-> ⚠️ **혼동 주의** — `getter()`가 막히는 이유는 "오버라이딩을 안 해서"가 **아니다.** `Object`에 없는 메소드는 애초에 오버라이딩할 대상 자체가 없다. 기준은 오직 **"`Object`의 목록에 그 이름이 있느냐"** 하나뿐이다.
-
-### 2문 — private는 "인스턴스 단위"가 아니라 "클래스 단위"
-
-`private`가 검사하는 것은 **"이 인스턴스가 나(`this`)인가?"가 아니라 "이 코드가 그 클래스 안에서 작성되었는가?"** 이다.
-
-| 코드 위치 | `Point`의 `private int xPos` 접근 |
+| 방향 | 가능 여부 |
 |---|---|
-| `Point` 클래스 **안**에서, `this.xPos` | ⭕️ (당연) |
-| `Point` 클래스 **안**에서, **다른** `Point` 인스턴스의 `xPos` | ⭕️ 같은 클래스 소속이면 남의 것도 OK |
-| `Point` 클래스 **밖**에서, `p1.xPos` | ❌ `has private access` |
-| `Point` 클래스 **밖**에서, 캐스팅까지 해서 `((Point)obj).xPos` | ❌ **여전히 막힘** — 캐스팅은 1문만 열 뿐 2문은 못 연다 |
+| `protected` → `public` (**확대**) | ⭕️ 가능 |
+| `public` → `protected` (**축소**) | ❌ 불가능 |
 
-즉 `equals` 안에서 같은 클래스의 다른 인스턴스가 지닌 `private` 필드에 접근할 수 있는 것은 **캐스팅 덕분이 아니라, `equals`가 그 클래스 소속으로 작성되었기 때문**이다.
+### super.clone()이 복사하는 것 — 왜 얕고, 왜 깊은가
 
-### 에러 메시지로 원인 구분하기
+`super.clone()`의 동작 규칙은 하나뿐이다.
 
-| 에러 메시지 | 어느 문에서 막혔나 | 컴파일러 상태 | 해결 방향 |
-|---|---|---|---|
-| `cannot find symbol` | **1문** | 그 이름을 **아예 모름** | 다운캐스팅으로 타입을 알려준다 |
-| `has private access in ...` | **2문** | 이름은 **찾았으나** 자격이 없음 | 같은 클래스 안에서 접근하거나 `public` 메소드를 거친다 |
+> **모든 인스턴스 변수의 "값"을 그대로 복사한다.**
 
-> 💡 **개발 팁 — 에러 메시지 두 종류만 구분하면 삽질이 줄어든다**
-> 이 둘을 헷갈리면 "캐스팅만 계속 고치거나, getter만 계속 만드는" 삽질에 빠진다. `cannot find symbol`은 **타입 문제**, `has private access`는 **접근 범위 문제**로 즉시 갈라서 접근하자.
-> 또한 이 정적 타입 규칙은 `List<String> list = new ArrayList<>();`처럼 **인터페이스 타입으로 변수를 선언하는 관례**의 근거이기도 하다. 변수의 선언된 타입이 곧 "그 변수로 부를 수 있는 기능의 전부"이므로, 인터페이스로 선언해 두면 구현체를 바꿔도 호출 가능한 목록(계약)이 흔들리지 않는다.
+자료형에 따른 예외는 없다. 헷갈리는 이유는 **"값"이 무엇인지가 자료형마다 다르기 때문**이다.
 
-> 🔤 **영어 한 스푼** — `symbol`은 '기호·상징'이지만 컴퓨터과학에서는 **"이름이 붙여진 대상"** 을 뜻하는 전문 용어다. 어원은 컴파일러가 관리하는 자료구조 **symbol table**("이 프로그램에 등장하는 모든 이름과 그 정체를 적어둔 표")에서 왔다. 그래서 `cannot find symbol`은 "그 이름을 목록에서 찾을 수 없다"가 정확한 번역이다. · `supertype` = 상위 타입(부모) · `private` = 사적인 → 자바에서는 "이 **클래스**만의 사적인 것"이라, 같은 클래스로 만든 인스턴스끼리는 서로의 사적인 부분을 볼 수 있다.
+| 인스턴스 변수 | 그 변수에 담긴 **값**의 정체 | 복사 후 결과 |
+|---|---|---|
+| `int age` | 숫자 `27` 그 자체 | 원본과 **완전히 독립** |
+| `String name` | 인스턴스의 **주소** | 원본과 **같은 인스턴스 공유** |
+| `int[] arr` | 인스턴스의 **주소** | 원본과 **같은 인스턴스 공유** |
+| `Point upperLeft` | 인스턴스의 **주소** | 원본과 **같은 인스턴스 공유** |
+
+즉 **참조변수에 담겨 있는 값은 인스턴스 자체가 아니라 주소**다. 그래서 기본 자료형은 값(숫자)이 복사되어 독립적이지만, 참조형은 값(주소)이 복사되어 원본과 같은 곳을 가리키게 된다.
+
+**얕은 복사**라 부르는 이유가 여기에 있다. 주소까지만 복사하고 **그 주소가 가리키는 인스턴스는 건드리지 않으므로**, 딱 1단만 파고 멈춘다. 반대로 그 인스턴스까지 따라 내려가며 복사하는 것이 **깊은 복사**다.
+
+다만 참조형이라고 전부 깊은 복사가 필요한 것은 아니다.
+
+> **깊은 복사가 필요한 것은 "참조형이면서 수정이 가능한" 인스턴스 변수다.**
+
+배열이나 `Point`처럼 **내용 변경이 가능한** 인스턴스는 공유되는 순간 한쪽의 수정이 다른 쪽까지 오염시킨다. 반면 `String`은 주소가 복사되어 공유되는 것은 마찬가지지만 **수정 자체가 불가능**해 안전하다. (아래 *인스턴스 변수가 String인 경우의 깊은 복사* 참고)
+
+참고로 이 원리는 **메소드의 인자 전달**에도 똑같이 적용된다. 자바는 언제나 값을 복사해서 전달하며, 참조형을 넘길 때 복사되는 값 역시 '주소'다.
+
+### 얕은 복사 (Shallow Copy) — 예제 `P431_ShallowCopy`
+
+위 규칙을 `Rectangle`에 적용해 보자. `Rectangle`의 인스턴스 변수는 `Point`를 가리키는 참조변수 둘이므로, `clone` 호출 시 복사되는 것은 **주소 둘**뿐이다.
+
+**[그림 19-10: 얕은 복사 2]**
+
+```
+Rectangle 참조변수        Rectangle 인스턴스           Point 인스턴스
+   org ──────────▶ [ upperLeft ·──┐  ┌────────────▶ [ xPos, yPos ]
+                     lowerRight ·─┼──┘        ┌───▶ [ xPos, yPos ]
+                                  └───────────┘
+   cpy ──────────▶ [ upperLeft ·──┘  (같은 Point 를 가리킴)
+                     lowerRight ·─────────────┘
+```
+
+- `Rectangle` 인스턴스는 **2개로 늘어났다.**
+- 그러나 `Point` 인스턴스는 **여전히 2개뿐이고, 두 Rectangle이 이를 공유한다.**
+
+따라서 `cpy`를 통해 위치를 바꾸면 `org`의 값까지 함께 바뀐다.
+
+### 깊은 복사 (Deep Copy) — 예제 `P435_DeepCopy`
+
+**[그림 19-11: 깊은 복사]**
+
+```
+Rectangle 참조변수        Rectangle 인스턴스        Point 인스턴스
+   org ──────────▶ [ upperLeft ·─────────▶ [ xPos, yPos ]
+                     lowerRight ·────────▶ [ xPos, yPos ]
+
+   cpy ──────────▶ [ upperLeft ·─────────▶ [ xPos, yPos ]   (별도)
+                     lowerRight ·────────▶ [ xPos, yPos ]   (별도)
+```
+
+참조하는 `Point` 인스턴스까지 **각자 따로** 갖도록 복사하는 것이 깊은 복사다. 이 형태의 복사가 이뤄지도록 `clone`을 다음과 같이 오버라이딩해야 한다.
+
+```java
+@Override
+public Object clone() throws CloneNotSupportedException {
+    // Object 클래스의 clone 메소드 호출을 통한 복사본 생성
+    Rectangle copy = (Rectangle)super.clone();
+
+    // 깊은 복사의 형태로 복사본을 완성
+    copy.upperLeft = (Point)upperLeft.clone();
+    copy.lowerRight = (Point)lowerRight.clone();
+
+    // 완성된 복사본의 참조 값 반환
+    return copy;
+}
+```
+
+### 인스턴스 변수가 String인 경우의 깊은 복사
+
+다음 클래스도 인스턴스 변수(참조형)를 멤버로 지니고 있다. 따라서 이 클래스가 깊은 복사를 하도록 `clone` 메소드를 오버라이딩하고자 한다.
+
+```java
+class Person implements Cloneable {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    ....
+}
+```
+
+그런데 `String` 클래스가 `Cloneable` 인터페이스를 구현하지 않는 이유는 무엇일까? 그 이유는 매우 간단하다. 그리고 합리적이다.
+
+> **"String은 문자열의 수정이 불가능하므로, 깊은 복사의 대상에서 제외해도 된다."**
+
+`String` 인스턴스의 내용을 이루는 문자열은 **인스턴스 생성 시 결정되고, 한번 결정되면 변경이 불가능**하다. 따라서 서로 다른 인스턴스가 **하나의 String 인스턴스를 공유해도 문제가 되지 않는다.** 즉 위의 `clone` 메소드는 다음과 같이 오버라이딩을 하는 것이 합리적이다.
+
+```java
+@Override
+public Object clone() throws CloneNotSupportedException {
+    return super.clone();
+}   // Person 클래스의 합리적인 clone 오버라이딩
+```
+
+> **참고 — 배열의 clone 메소드 호출**
+> 배열도 인스턴스이다. 그리고 `clone` 메소드의 호출이 가능하도록 `public`으로 오버라이딩되어 있다. 그러나 깊은 복사가 진행되도록 오버라이딩되어 있지는 않다. 따라서 배열이 지니는 참조 값의 복사만 이뤄질 뿐 해당 참조 값의 인스턴스까지는 복사되지 않는다.
+
+### clone 메소드의 반환형 수정: Covariant Return Type
+
+자바 5 이후부터는 **오버라이딩 과정에서 반환형의 수정을 허용**한다. 예를 들어 다음 클래스의 `method`를 오버라이딩할 때,
+
+```java
+class AAA {
+    public AAA method() {...}    // 반환형이 자신이 속한 AAA 클래스 형이다.
+}
+```
+
+다음과 같이 반환형을 수정할 수 있다.
+
+```java
+class ZZZ extends AAA {
+    @Override
+    public ZZZ method() {...}    // 반환형이 자신이 속한 ZZZ 클래스 형이다.
+}
+```
+
+단 **무엇으로든 수정할 수 있는 것은 아니다.** 위에서 보이는 바와 같이 클래스의 이름이 `AAA`인 경우 **반환형이 `AAA`인 메소드에 대해서만** 반환형을 수정하여 오버라이딩할 수 있다. 그리고 오버라이딩을 할 때에도 하위 클래스의 이름이 `ZZZ`인 경우 반환형은 `ZZZ`로 수정할 수 있다.
+
+### Point 클래스에 적용하기
+
+이러한 문법적 특성을 고려하여 `Point` 클래스의 `clone` 메소드는 다음과 같이 오버라이딩할 수 있다.
+
+```java
+class Point implements Cloneable {
+    ....
+    @Override
+    public Point clone() throws CloneNotSupportedException {
+        return (Point)(super.clone());
+    }
+}
+```
+
+그리고 이렇게 오버라이딩을 하면, 다음과 같이 **형 변환 없는 `clone` 메소드의 호출**이 가능하다.
+
+```java
+Point org = new Point(1, 2);
+Point cpy = org.clone();     // 형 변환 필요 없음
+```
