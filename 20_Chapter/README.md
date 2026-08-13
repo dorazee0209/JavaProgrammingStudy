@@ -96,3 +96,80 @@ System.out.println("오차 있는 1.6 : " + d);
 | 뺄셈 | `public BigDecimal subtract(BigDecimal subtrahend)` |
 | 곱셈 | `public BigDecimal multiply(BigDecimal multiplicand)` |
 | 나눗셈 | `public BigDecimal divide(BigDecimal divisor)` |
+
+## 20-3. Math 클래스
+
+### 수학 관련 연산을 제공하는 Math 클래스 — 예제 `P456_SimpleMathUse`
+
+- `java.lang.Math` 클래스에는 수학과 관련된 다양한 연산이 **클래스 메소드(static)** 로 정의되어 있다.
+- 따라서 **인스턴스를 생성하지 않고** `Math.메소드이름(...)` 형태로 바로 호출하면 된다.
+- 원주율과 같은 상수도 클래스 변수로 정의되어 있어 `Math.PI`로 접근한다.
+
+```java
+public class P456_SimpleMathUse {
+    public static void main(String[] args) {
+        System.out.println("원주율: " + Math.PI);
+        System.out.println("Root 2: " + Math.sqrt(2));
+        System.out.println();
+        System.out.println("PI's degree: " + Math.toDegrees(Math.PI));
+        System.out.println("2PI 's degree: " + Math.toDegrees(2.0 * Math.PI));
+        System.out.println();
+
+        double radian45 = Math.toRadians(45); // Convert to radians
+        System.out.println("sin(45): " + Math.sin(radian45));
+        System.out.println("cos(45): " + Math.cos(radian45));
+        System.out.println("tan(45): " + Math.tan(radian45));
+        System.out.println();
+        System.out.println("log(25): " + Math.log(25));
+        System.out.println("2 to the power of 16: " + Math.pow(2, 16));
+    }
+}
+```
+
+**실행 결과**
+
+```
+원주율: 3.141592653589793
+Root 2: 1.4142135623730951
+
+PI's degree: 180.0
+2PI 's degree: 360.0
+
+sin(45): 0.7071067811865475
+cos(45): 0.7071067811865476
+tan(45): 0.9999999999999999
+
+log(25): 3.2188758248682006
+2 to the power of 16: 65536.0
+```
+
+### 디그리(Degree)와 라디안(Radian)
+
+- 위 예제 관련하여 한 가지만 언급하면, 사인·코사인·탄젠트 값을 얻기 위해서는 `sin`, `cos`, `tan` 메소드를 호출해야 하는데, 이때 **전달되는 인자는 라디안 단위의 값이어야 한다.**
+- 따라서 이 세 가지 메소드 호출 이전에 다음과 같이 **'디그리(Degree)' 단위의 값을 '라디안(Radian)' 단위의 값으로 변환하는 과정**을 거쳐야 한다.
+
+```java
+double radian45 = Math.toRadians(45);   // 45도 → 라디안으로 변환
+System.out.println("sin(45): " + Math.sin(radian45));
+```
+
+> **"삼각함수 메소드에 전달하는 인자는 디그리가 아닌 라디안 단위의 값이어야 한다."**
+
+- 반대로 라디안 값을 디그리 값으로 되돌릴 때에는 `Math.toDegrees` 메소드를 사용한다. 그래서 위 예제에서 `Math.toDegrees(Math.PI)`의 결과는 `180.0`이고, `Math.toDegrees(2.0 * Math.PI)`의 결과는 `360.0`이다.
+
+### 예제에서 사용한 주요 메소드
+
+| 구분 | 메소드 | 설명 |
+|---|---|---|
+| 상수 | `Math.PI` | 원주율 π (`double` 형 클래스 변수) |
+| 제곱근 | `public static double sqrt(double a)` | 인자로 전달된 값의 제곱근 |
+| 각도 변환 | `public static double toDegrees(double angrad)` | 라디안 → 디그리 |
+| 각도 변환 | `public static double toRadians(double angdeg)` | 디그리 → 라디안 |
+| 삼각함수 | `public static double sin(double a)` | 사인 값 (인자는 **라디안**) |
+| 삼각함수 | `public static double cos(double a)` | 코사인 값 (인자는 **라디안**) |
+| 삼각함수 | `public static double tan(double a)` | 탄젠트 값 (인자는 **라디안**) |
+| 로그 | `public static double log(double a)` | 자연로그 값 |
+| 거듭제곱 | `public static double pow(double a, double b)` | a의 b 제곱 |
+
+> 💡 **개발 팁 — `tan(45)`가 왜 1이 아니라 0.9999...일까?**
+> 실행 결과를 보면 `tan(45)`의 값이 `1.0`이 아닌 `0.9999999999999999`이다. `Math.toRadians(45)`로 얻은 라디안 값 자체가 무리수 π/4를 `double`로 근사한 값이기 때문이다. 20-2에서 본 실수의 오차 문제가 그대로 이어지는 것이므로, **부동소수점 연산 결과는 `==`로 비교하지 말고 오차 범위(예: `Math.abs(a - b) < 1e-9`)로 비교**해야 한다.
