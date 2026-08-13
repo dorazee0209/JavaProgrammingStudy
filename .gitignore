@@ -9,3 +9,4 @@ out/
 JavaProgrammingStudy.iml
 .claude/
 .obsidian/
+*.iml
