@@ -173,3 +173,107 @@ System.out.println("sin(45): " + Math.sin(radian45));
 
 > 💡 **개발 팁 — `tan(45)`가 왜 1이 아니라 0.9999...일까?**
 > 실행 결과를 보면 `tan(45)`의 값이 `1.0`이 아닌 `0.9999999999999999`이다. `Math.toRadians(45)`로 얻은 라디안 값 자체가 무리수 π/4를 `double`로 근사한 값이기 때문이다. 20-2에서 본 실수의 오차 문제가 그대로 이어지는 것이므로, **부동소수점 연산 결과는 `==`로 비교하지 말고 오차 범위(예: `Math.abs(a - b) < 1e-9`)로 비교**해야 한다.
+
+## 20-4. 난수의 생성과 Random 클래스
+
+### 난수 생성 — 예제 `P475_RandomNumberGenerator`
+
+- 난수의 생성에는 `java.util.Random` 클래스를 사용한다.
+- 인스턴스를 생성한 뒤 `nextInt`, `nextDouble` 등의 메소드를 호출하면 난수를 얻을 수 있다.
+
+```java
+import java.util.Random;
+
+public class P475_RandomNumberGenerator {
+    public static void main(String[] args) {
+        Random r = new Random();
+        for (int i = 0; i < 7; i++) {
+            System.out.println(r.nextInt(1_000));
+        }
+    }
+}
+```
+
+- `nextInt(1000)`은 **0 이상 1000 미만**의 정수를 반환한다. (상한 값 자신은 포함되지 않는다.)
+- 이 예제는 **실행할 때마다 다른 값**이 출력된다.
+
+| 메소드 | 반환되는 난수 |
+|---|---|
+| `public boolean nextBoolean()` | boolean형 난수 |
+| `public int nextInt()` | int형 난수 |
+| `public int nextInt(int bound)` | 0 이상 bound 미만의 int형 난수 |
+| `public long nextLong()` | long형 난수 |
+| `public float nextFloat()` | 0.0 이상 1.0 미만의 float형 난수 |
+| `public double nextDouble()` | 0.0 이상 1.0 미만의 double형 난수 |
+
+### 씨드(Seed) 기반의 난수 생성
+
+- 컴퓨터를 이용한 난수의 생성은 생각보다 어려운 일이다. 컴퓨터는 **알고리즘을 기반으로 일을 하기 때문에** 난수를 생성하는 데에도 숨겨진 패턴이 존재할 수밖에 없다.
+- 비록 쉽게 파악할 수 없을지라도 분명 패턴은 존재한다. 그래서 컴퓨터가 생성하는 난수를 가리켜 **'Pseudo-random number(가짜 난수)'** 라 한다.
+
+```java
+Random rand = new Random(12);   // 12가 씨드 값
+```
+
+- 위 문장에서 `Random`의 생성자에 전달된 숫자 12는 난수의 생성 과정에서 **씨앗으로 사용된다.** (씨앗으로 사용된 이 값을 **'씨드 값(Seed Number)'** 이라 한다.)
+- 즉 난수 생성 알고리즘이 이 숫자를 기반으로 돌아가기 때문에, **이 값이 같으면 생성되는 난수의 패턴은 100% 일치한다.**
+- 따라서 씨드 값을 고정한 예제는 **몇 번을 실행해도 그 결과가 동일하다.**
+
+```
+# 1회차 실행       # 2회차 실행
+866                866
+812                812
+556                556
+133                133
+624                624
+211                211
+750                750
+```
+
+> **"씨드 값이 같으면 생성되는 난수의 패턴은 100% 일치한다."**
+
+### 매 실행마다 다른 난수를 얻는 방법 — 예제 `SeedSetRandom`
+
+그렇다면 예제 `P475_RandomNumberGenerator`는 어떻게 매 실행 때마다 생성되는 난수의 패턴이 달랐던 것일까? 다음 예제를 보자.
+
+```java
+import java.util.Random;
+
+class SeedSetRandom {
+    public static void main(String[] args) {
+        Random rand = new Random(System.currentTimeMillis());
+
+        for (int i = 0; i < 7; i++)
+            System.out.println(rand.nextInt(1000));
+    }
+}
+```
+
+- 위 문장에 포함되어 있는 `System.currentTimeMillis()` 메소드 호출문은, 컴퓨터의 현재 시간을 기준으로 **1970년 1월 1일 자정 이후로 지나온 시간을 밀리 초(1/1000초) 단위로 계산하여 반환**한다.
+- 따라서 예제를 실행할 때마다 `Random` 인스턴스에 심어지는 **씨드 값은 달라진다.** 그리고 그 결과로 **예측이 훨씬 어려워진 난수**가 만들어졌다.
+
+그럼 `P475_RandomNumberGenerator`처럼 **씨드 값을 전달하지 않은 경우**는 어떨까?
+
+```java
+Random rand = new Random();     // 씨드 값을 전달하지 않음
+```
+
+이 문장에서 호출하는 생성자는 내부적으로 다음과 같은 방법으로 씨드 값을 설정한다. 즉 **현재 시간을 기준으로 씨드 값을 만들어서, 씨드 값을 인자로 받는 다른 생성자를 호출한다.**
+
+```java
+public Random() {
+    this(System.currentTimeMillis());   // Random(long seed) 생성자 호출
+}
+```
+
+- 그래서 이전 예제 `P475_RandomNumberGenerator`는 실행할 때마다 다른 패턴의 난수가 만들어졌던 것이다.
+- 그리고 `Random` 인스턴스의 다음 메소드 호출을 통해서 원하면 언제든지 새로운 씨드 값을 지정할 수 있다.
+
+```java
+public void setSeed(long seed)
+```
+
+> 💡 **개발 팁 — 씨드 고정은 '단점'이 아니라 '기능'이다**
+> 씨드를 고정하면 항상 같은 난수가 나온다는 성질은, **테스트 코드를 작성할 때 아주 유용하다.** 난수를 쓰는 로직은 실행할 때마다 결과가 달라져서 검증이 어려운데, `new Random(42)`처럼 씨드를 박아두면 매번 동일한 입력으로 재현 가능한 테스트를 만들 수 있다.
+>
+> 반대로 **보안이 필요한 곳(비밀번호 초기화 토큰, 세션 ID 등)에는 `Random`을 쓰면 안 된다.** 현재 시간 기반이라 예측이 가능하기 때문이다. 이럴 때는 `java.security.SecureRandom`을 사용한다.
