@@ -58,3 +58,41 @@ public static void showData(Object obj) {
 - 값을 인스턴스에 감싸는 행위를 가리켜 **'박싱(Boxing)'** 이라 한다.
 - 반대로 저장된 값을 꺼내는 행위를 가리켜 **'언박싱(Unboxing)'** 이라 한다.
 - **박싱은 인스턴스의 생성을 통해서** 이뤄지지만, **언박싱은 래퍼 클래스에 정의된 메소드의 호출을 통해서** 이뤄진다.
+
+## 20-2. BigDecimal 클래스
+
+### 오차 없는 실수의 표현
+
+- 다음과 같이 실수를 **문자열로 전달**하면서 `BigDecimal` 인스턴스를 생성할 수 있다.
+
+```java
+BigDecimal d1 = new BigDecimal("1.6");   // 정상적인 방법
+BigDecimal d2 = new BigDecimal("0.1");   // 정상적인 방법
+```
+
+- 이와 달리 다음과 같이 실수 1.6과 0.1을 인자로 전달하면서 `BigDecimal` 인스턴스를 생성할 수도 있다.
+
+```java
+BigDecimal d1 = new BigDecimal(1.6);     // 가능은 하지만
+BigDecimal d2 = new BigDecimal(0.1);     // 가능은 하지만
+```
+
+- 그러나 이렇게 인스턴스를 생성할 경우 `BigDecimal` 인스턴스에 저장된 값은 더 이상 1.6과 0.1이 아니다. 실수는 표현되는 순간부터 오차를 지니기 때문이다. 즉 `BigDecimal`의 생성자에 전달된 값은 오차가 있는 1.6과 0.1이다. 그리고 이러한 사실은 다음과 같이 그 값을 출력해 봄으로써 확인할 수 있다.
+
+```java
+BigDecimal d = new BigDecimal(1.6);
+System.out.println("오차 있는 1.6 : " + d);
+```
+
+> **"오차 없는 값을 지니는 `BigDecimal` 인스턴스를 생성하려면, 그 값을 문자열로 구성해서 전달해야 한다."**
+
+### BigDecimal의 사칙연산 메소드
+
+`BigInteger` 클래스와 마찬가지로 `BigDecimal` 클래스에도 다음 사칙연산을 포함하여 다양한 연산을 위한 메소드가 정의되어 있다.
+
+| 연산 | 메소드 |
+|---|---|
+| 덧셈 | `public BigDecimal add(BigDecimal augend)` |
+| 뺄셈 | `public BigDecimal subtract(BigDecimal subtrahend)` |
+| 곱셈 | `public BigDecimal multiply(BigDecimal multiplicand)` |
+| 나눗셈 | `public BigDecimal divide(BigDecimal divisor)` |
