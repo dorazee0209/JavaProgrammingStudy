@@ -280,7 +280,7 @@ public void setSeed(long seed)
 
 ---
 
-## 20-5. 문자열의 토큰(Token) 구분 — StringTokenizer 클래스
+## 20-5. 문자열의 토큰(Token) 구분 — StringTokenizer 클래스 — 예제 `P462_TokenizerString`
 
 ### 토큰(Token)과 구분자(Delimiter)
 
@@ -351,6 +351,45 @@ while (st.hasMoreTokens())          // 토큰이 남아 있는지 먼저 확인�
     System.out.println(st.nextToken());   // 있을 때만 꺼낸다
 ```
 
+### 예제 `P462_TokenizerString`
+
+앞에서 본 두 가지 경우(구분자 하나 / 구분자 여럿)를 한 번에 확인하는 예제이다.
+
+```java
+import java.util.StringTokenizer;
+
+public class P462_TokenizerString {
+    public static void main(String[] args) {
+        StringTokenizer st1 = new StringTokenizer("PM:08:15", ":");
+
+        while(st1.hasMoreTokens())
+            System.out.print(st1.nextToken() + ' ');
+        System.out.println();
+
+        StringTokenizer st2 = new StringTokenizer("12 + 36 - 8 / 2 = 44", "+-/= ");
+
+        while(st2.hasMoreTokens())
+            System.out.print(st2.nextToken() + ' ');
+        System.out.println();
+    }
+}
+```
+
+**실행 결과**
+
+```
+PM 08 15 
+12 36 8 2 44 
+```
+
+- `st1`은 콜론 하나만을 구분자로 삼아 `PM`, `08`, `15` 세 개의 토큰을 추출했다.
+- `st2`는 `"+-/= "`에 담긴 문자들을 구분자로 삼아 **연산자와 공백을 모두 걸러내고 숫자만** 추출했다.
+- 두 경우 모두 **구분자 자체는 출력되지 않았다.** 구분자는 토큰을 나누는 데 쓰이고 소멸되기 때문이다.
+
+> 💡 **개발 팁 — `nextToken() + ' '`가 왜 정상 동작할까?**
+> `' '`는 문자열 `" "`이 아니라 **`char`형 리터럴**이다. 그런데도 공백이 제대로 붙는 이유는, `+` 연산자의 **왼쪽 피연산자가 `String`(`nextToken()`의 반환값)이기 때문에 문자열 결합으로 처리**되기 때문이다.
+> 만약 `System.out.print('a' + ' ')`처럼 양쪽이 모두 `char`라면 **정수 덧셈**이 되어 `129`가 출력된다. 헷갈리기 쉬우므로 문자열을 이어붙일 의도라면 `" "`처럼 **큰따옴표**를 쓰는 편이 안전하다.
+
 ### 구분자도 토큰으로 반환받기
 
 - 예제의 실행 결과에서 보이듯이 **구분자는 토큰으로 구분되지 않고 버려진다.**
@@ -386,3 +425,177 @@ new StringTokenizer("12 + 36 - 8 / 2 = 44", "+-/= ");
 > - 두 번째 인자는 **"구분자로 쓸 문자들의 모음"** 이지, 하나의 구분 문자열이 아니다.
 > - `nextToken`은 반드시 **`hasMoreTokens`로 확인한 뒤에** 호출한다. (아니면 예외 발생)
 > - 구분자는 **기본적으로 버려진다.** 살리고 싶으면 생성자의 **세 번째 인자에 `true`** 를 전달한다.
+
+---
+
+## 20-6. 배열의 복사
+
+배열을 복사하는 방법에는 크게 두 가지가 있다. `java.util.Arrays` 클래스의 메소드를 쓰는 방법과, `java.lang.System` 클래스의 `arraycopy` 메소드를 쓰는 방법이다.
+
+### Arrays.copyOf — 배열 전체 또는 앞에서부터 일부 복사 — 예제 `P464_CopyOfArrays`
+
+```java
+public static double[] copyOf(double[] original, int newLength)
+```
+
+- **첫 번째 인자**로 복사할 원본 배열을, **두 번째 인자**로 **새로 생성할 배열의 길이**를 전달한다.
+- 그리고 **복사된 결과인 새로운 배열의 참조 값을 반환한다.** (즉 원본을 건드리지 않고 새 배열을 만들어 준다.)
+- 위 메소드는 `double`형 배열의 예이며, **모든 기본 자료형과 참조형에 대해 오버로딩되어 있다.**
+
+```java
+import java.util.Arrays;
+
+public class P464_CopyOfArrays {
+    public static void main(String[] args) {
+        double[] arOrg = new double[5];
+        for (int i = 0; i < 5; i++) {
+            String n = (i+1) + "." + (i+1);
+            arOrg[i] = Double.parseDouble(n);
+        }
+
+        // 배열 전체 복사
+        double[] arCpy1 = Arrays.copyOf(arOrg, arOrg.length);
+
+        // 세번째 요소까지만 복사
+        double[] arCpy2 = Arrays.copyOf(arOrg, 3);
+
+        for(double i : arCpy1)
+            System.out.printf("%.1f\t", i);
+        System.out.println();
+
+        for(double i : arCpy2)
+            System.out.printf("%.1f\t", i);
+        System.out.println();
+    }
+}
+```
+
+**실행 결과**
+
+```
+1.1	2.2	3.3	4.4	5.5	
+1.1	2.2	3.3	
+```
+
+- `Arrays.copyOf(arOrg, arOrg.length)` → **원본과 길이가 같은 배열**이 만들어지므로 **전체 복사**가 된다.
+- `Arrays.copyOf(arOrg, 3)` → **앞에서부터 3개**만 복사된다.
+- 즉 `copyOf`는 **항상 인덱스 0번부터** 복사한다. 복사의 **시작 위치를 지정할 수는 없다.**
+
+> 💡 **참고 — 원본보다 긴 길이를 지정하면?**
+> 예외가 발생하지 않고, 남는 자리는 **해당 자료형의 기본값으로 채워진다.** (숫자형은 `0`, `boolean`은 `false`, 참조형은 `null`) 배열의 길이를 늘리는 용도로도 쓸 수 있다는 뜻이다.
+
+### Arrays.copyOfRange — 지정한 구간만 복사 — 예제 `P465_CopyOfArrays`
+
+배열의 **중간 부분만** 복사하고 싶다면 `copyOfRange` 메소드를 사용한다.
+
+```java
+public static double[] copyOfRange(double[] original, int from, int to)
+```
+
+- **두 번째 인자** `from`은 복사를 **시작할 인덱스**이다. → **포함된다.**
+- **세 번째 인자** `to`는 복사를 **끝낼 인덱스**이다. → **포함되지 않는다.**
+
+```java
+import java.util.Arrays;
+
+public class P465_CopyOfArrays {
+    public static void main(String[] args) {
+        double[] arOrg = new double[5];
+        for (int i = 1; i <= 5; i++) {
+            String n;
+            n = i + "." + i;
+            arOrg[i-1] = Double.parseDouble(n);
+        }
+
+        double[] cpOrg = Arrays.copyOfRange(arOrg, 1, 4);
+
+        for(double i : cpOrg)
+            System.out.printf("%.1f\t", i);
+        System.out.println();
+    }
+}
+```
+
+**실행 결과**
+
+```
+2.2	3.3	4.4	
+```
+
+원본 배열이 `1.1 2.2 3.3 4.4 5.5`일 때 `copyOfRange(arOrg, 1, 4)`의 결과는 다음과 같다.
+
+```
+인덱스     0     1     2     3     4
+값       1.1   2.2   3.3   4.4   5.5
+              └──── 복사 ────┘
+               from=1        to=4 (미포함)
+```
+
+> **"`from`은 포함되고 `to`는 포함되지 않는다."** → 복사되는 요소의 개수는 `to - from`개이다.
+
+### System.arraycopy — 이미 존재하는 배열로 복사 — 예제 `P466_CopyOfSystem`
+
+`Arrays`의 메소드들은 **새로운 배열을 만들어서 반환**한다. 반면 **이미 생성되어 있는 배열에 복사**를 하고 싶다면 `System` 클래스의 `arraycopy` 메소드를 사용한다.
+
+```java
+public static void arraycopy(Object src, int srcPos, Object dest, int destPos, int length)
+```
+
+| 매개변수 | 의미 |
+|---|---|
+| `src` | **복사할 원본** 배열 |
+| `srcPos` | 원본 배열에서 **복사를 시작할 인덱스** |
+| `dest` | **복사될 대상** 배열 |
+| `destPos` | 대상 배열에서 **붙여넣기를 시작할 인덱스** |
+| `length` | **복사할 요소의 개수** |
+
+- 반환형이 `void`임에 주목하자. **새 배열을 만들지 않고, 이미 있는 `dest` 배열의 내용을 덮어쓴다.**
+- 매개변수형이 `Object`이므로 **모든 자료형의 배열**을 전달할 수 있다.
+
+```java
+public class P466_CopyOfSystem {
+    public static void main(String[] args) {
+        double[] org = new double[5];
+        double[] cpy = new double[3];
+        for (int i = 1; i <= 5; i++) {
+            String num = i + "." + i;
+            org[i-1] = Double.parseDouble(num);
+        }
+
+        // 배열 org의 idx = 1에서 cpy의 idx = 0으로 3개의 요소를 복사
+        System.arraycopy(org, 1, cpy, 0, 3);
+
+        for(double i : cpy)
+            System.out.printf("%.1f\t", i);
+        System.out.println();
+    }
+}
+```
+
+**실행 결과**
+
+```
+2.2	3.3	4.4	
+```
+
+```
+org    1.1   2.2   3.3   4.4   5.5
+              └─────┬─────┘  length=3, srcPos=1
+                    ↓
+cpy          2.2   3.3   4.4         destPos=0
+```
+
+### 세 가지 방법의 비교
+
+| 메소드 | 소속 | 반환값 | 시작 위치 지정 | 대상 배열 |
+|---|---|---|---|---|
+| `Arrays.copyOf(원본, 길이)` | `java.util.Arrays` | **새 배열** | ❌ (항상 0부터) | 자동 생성 |
+| `Arrays.copyOfRange(원본, from, to)` | `java.util.Arrays` | **새 배열** | ⭕ | 자동 생성 |
+| `System.arraycopy(src, srcPos, dest, destPos, len)` | `java.lang.System` | `void` | ⭕ | **직접 준비해야 함** |
+
+> 💡 **개발 팁 — 어느 것을 써야 할까?**
+> 대부분의 경우 **`Arrays.copyOf` / `copyOfRange`가 더 안전하고 읽기 쉽다.** 대상 배열을 직접 준비할 필요가 없어서 길이 계산 실수로 인한 `ArrayIndexOutOfBoundsException`을 피할 수 있기 때문이다.
+> `System.arraycopy`는 **이미 존재하는 배열의 특정 위치에 끼워 넣어야 할 때**(예: 버퍼 재사용, 두 배열 이어 붙이기) 쓴다. 참고로 `Arrays.copyOf`도 내부적으로는 `System.arraycopy`를 호출하므로 **성능 차이는 없다.**
+
+> ⚠️ **주의 — 이 복사는 모두 '얕은 복사(shallow copy)'다**
+> 기본 자료형 배열은 값 자체가 복사되므로 문제가 없다. 그러나 **참조형 배열**을 복사하면 **인스턴스가 복사되는 것이 아니라 참조 값(주소)만 복사된다.** 즉 원본 배열과 복사본 배열이 **같은 인스턴스를 가리키게 되므로**, 한쪽에서 인스턴스의 내용을 바꾸면 다른 쪽에도 그대로 반영된다.
