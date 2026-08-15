@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /*
  * [문제 20-2] 정렬의 기준 수정하기
  *
@@ -12,8 +14,49 @@
  * 록 배열의 앞쪽에 위치하도록 예제를 수정해야 한다.
  */
 
+class Person implements Comparable{
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return name + " : " + age;
+    }
+
+    @Override
+    public int compareTo(Object obj) {
+        if(this.name.length() > ((Person)obj).name.length())
+            return 1;
+        else if(this.name.length() < ((Person)obj).name.length())
+            return -1;
+        else
+            return 0;
+    }
+}
+
 public class Answer02 {
     public static void main(String[] args) {
+        Person[] ar ={
+            new Person("LeeJungSoo", 29),
+            new Person("JinHo", 15),
+            new Person("ParkSooJung", 37)
+        };
+        System.out.println("Before sorting: ");
+        for (Person p : ar) {
+            System.out.println(p);
+        }
 
+        Arrays.sort(ar);
+        System.out.println();
+
+        System.out.println("After sorting: ");
+        for (Person p : ar) {
+            System.out.println(p);
+        }
     }
 }
