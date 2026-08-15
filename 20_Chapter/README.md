@@ -178,7 +178,134 @@ System.out.println(rObj);
 > ⚠️ **주의 — 오토 언박싱과 `null`**
 > 오토 언박싱은 내부적으로 `intValue()` 같은 **메소드 호출**로 바뀐다. 따라서 래퍼 참조변수가 `null`인 상태에서 언박싱이 일어나면 `NullPointerException`이 발생한다. `Integer num = null; int n = num;` 같은 코드가 컴파일은 되지만 실행 중에 터지는 이유다.
 
+### Number 클래스와 래퍼 클래스의 static 메소드
+
+앞서 소개한 모든 래퍼 클래스는 다음 클래스를 상속한다.
+
+```java
+java.lang.Number
+```
+
+그리고 이 클래스에는 다음의 추상 메소드들이 존재한다. 즉 **`Number`도 추상 클래스**이다.
+
+```java
+public abstract int intValue()
+public abstract long longValue()
+public abstract double doubleValue()
+```
+
+따라서 이를 상속하는 `Integer`, `Double`과 같은 클래스들은 **위의 메소드 모두를 구현**하고 있다. 때문에 어떠한 래퍼 인스턴스를 대상으로도 인스턴스에 저장된 값을 **다양한 형태로 반환**할 수 있다.
+
+#### 저장된 값을 다른 형태로 꺼내기 — 예제 `P448_NumberMethod`
+
+```java
+Integer num1 = new Integer(10);
+System.out.println(num1.intValue());       // int형 값으로 반환
+System.out.println(num1.doubleValue());    // double형 값으로 반환
+
+Double num2 = new Double(3.14);
+System.out.println(num2.intValue());       // int형 값으로 반환
+System.out.println(num2.doubleValue());    // double형 값으로 반환
+```
+
+**실행 결과**
+
+```
+10
+10.0
+3
+3.14
+```
+
+출력 결과를 보면 **`Double`형 인스턴스에 저장된 값을 `int`형으로 반환할 경우 소수점 이하의 값이 삭제**되는 것을 알 수 있다.
+
+#### 래퍼 클래스의 static 메소드 — 예제 `P449_WrapperClassMethod`
+
+래퍼 클래스에는 `static`으로 선언된 다양한 메소드들이 존재한다.
+
+```java
+// 클래스 메소드를 통한 인스턴스 생성 방법 두 가지
+Integer n1 = Integer.valueOf(5);        // 숫자 기반 Integer 인스턴스 생성
+Integer n2 = Integer.valueOf("1024");   // 문자열 기반 Integer 인스턴스 생성
+
+// 대소 비교와 합을 계산하는 클래스 메소드
+System.out.println("큰 수: " + Integer.max(n1, n2));
+System.out.println("작은 수: " + Integer.min(n1, n2));
+System.out.println("합: " + Integer.sum(n1, n2));
+
+// 정수에 대한 2진, 8진, 16진수 표현 결과를 반환하는 클래스 메소드
+System.out.println("12의 2진 표현: " + Integer.toBinaryString(12));
+System.out.println("12의 8진 표현: " + Integer.toOctalString(12));
+System.out.println("12의 16진 표현: " + Integer.toHexString(12));
+```
+
+**실행 결과**
+
+```
+Max: 1024
+Min: 5
+Sum: 1029
+
+12의 2진수 표현: 1100
+12의 8진수 표현: 14
+12의 16진수 표현: c
+```
+
+- 래퍼 클래스에는 **해당 클래스의 성격에 필요한 클래스 메소드**가 다양하게 정의되어 있다. 특히 자바 5와 8을 거치면서 많은 수의 메소드가 추가되었다.
+- 지금 모든 메소드를 알고 있어야 할 필요는 없지만, **어떠한 종류의 메소드가 존재하는지 자바 문서를 통해 확인해 볼 필요는 있다.**
+- 위 예제는 `Integer` 클래스를 대상으로 작성되었는데, 이에 대응하는 `Double` 클래스의 메소드도 유추해 볼 수 있다. 예를 들어 `Double.valueOf(5.5)`, `Double.max(n1, n2)` 같은 코드의 작성이 가능하다.
+- 참고로 `Integer`와 `Double`에 정의된 `max`, `min`, `sum` 메소드는 **기본 자료형의 값을 인자로 받는다.** 즉 위 예제에서는 이 메소드의 호출 과정에서 **오토 언박싱이 발생**하게 된다.
+
 ## 20-2. BigInteger 클래스와 BigDecimal 클래스
+
+`int`와 같은 정수 자료형은 표현할 수 있는 값의 **크기에 한계**가 있다는 문제점이 있다. 그리고 `double`과 같은 실수 자료형은 **오차 없는 값의 표현이 불가능**하다는 문제점이 있다. 그래서 이러한 문제점의 해결을 목적으로 `BigInteger` 클래스와 `BigDecimal` 클래스가 정의되었다.
+
+### 매우 큰 정수의 표현을 위한 BigInteger 클래스 — 예제 `P451_SoBigInteger`
+
+일반적인 상황이라면 `int`형으로 원하는 정수를 충분히 표현할 수 있다. 그러나 정수 자료형 중에서 가장 표현 범위가 넓은 `long`형으로도 **표현 불가능한 수**를 표현해야 할 때가 있다. 자바는 이러한 경우를 대비하여 `BigInteger` 클래스를 제공한다.
+
+```java
+// long형으로 표현 가능한 값의 크기 출력
+System.out.printf("Max: %d\n", Long.MAX_VALUE);
+System.out.printf("Min: %d\n\n", Long.MIN_VALUE);
+
+// 매우 큰 수를 BigInteger 인스턴스로 표현
+BigInteger big1 = new BigInteger("10000000000000000000");
+BigInteger big2 = new BigInteger("-9999999999999999999");
+
+BigInteger r1 = big1.add(big2);          // 덧셈
+BigInteger r2 = big1.multiply(big2);     // 곱셈
+```
+
+**실행 결과**
+
+```
+Max: 9223372036854775807
+Min: -9223372036854775808
+
+덧셈 결과: 1
+곱셈 결과: -99999999999999999990000000000000000000
+```
+
+- 예제에서는 표현 가능한 최대 정수의 크기를 확인하기 위해 `Long.MAX_VALUE`(최댓값)와 `Long.MIN_VALUE`(최솟값)를 출력하였다.
+- 그리고 `long`형으로 표현할 수 없는 수를 `BigInteger` 인스턴스를 생성해서 표현하였다. 이때 **수는 문자열로 표현해야 한다.**
+- 그런데 아무리 큰 수를 표현해도 **연산이 불가능하면 활용도는 낮아진다.** 따라서 `BigInteger` 클래스에는 다양한 연산을 위한 메소드가 정의되어 있다.
+
+#### BigInteger의 사칙연산 메소드
+
+| 연산 | 메소드 |
+|---|---|
+| 덧셈 | `public BigInteger add(BigInteger val)` |
+| 뺄셈 | `public BigInteger subtract(BigInteger val)` |
+| 곱셈 | `public BigInteger multiply(BigInteger val)` |
+| 나눗셈의 몫 | `public BigInteger divide(BigInteger val)` |
+| 나눗셈의 나머지 | `public BigInteger remainder(BigInteger val)` |
+
+인스턴스에 저장된 값을 `int`형 정수로 반환할 때는 `intValueExact` 메소드를 사용한다.
+
+```java
+int num = r1.intValueExact();
+```
 
 ### 오차 없는 실수의 표현을 위한 BigDecimal 클래스 — 예제 `P453_DoubleError`, `P454_WowBigDecimal`
 
@@ -863,3 +990,96 @@ public int compareTo(Object o) {
 
 > 💡 **개발 팁 — `Comparable`은 제네릭으로 쓰는 것이 요즘 방식**
 > 교재의 `implements Comparable`은 **raw type**이라 `compareTo(Object o)`로 받아 매번 `(Person)o` 형변환을 해야 한다. `implements Comparable<Person>`으로 쓰면 `compareTo(Person o)`가 되어 **형변환이 사라지고**, 엉뚱한 타입이 들어오는 실수를 컴파일 시점에 잡을 수 있다. 제네릭은 21·22장에서 자세히 다룬다.
+
+> **참고 — `Comparable<T>` 인터페이스**
+> `Comparable` 인터페이스는 자바에 '제네릭(Generic)'이 도입되면서 `Comparable<T>` 인터페이스로 수정되었다. 그러나 지금도 **기존 코드와의 호환성 유지를 위해** `Comparable` 인터페이스를 지원하고 있다. 교재에서는 제네릭 이후에 '컬렉션 프레임워크'를 설명하면서 `Comparable<T>`를 소개한다.
+
+### 배열의 탐색
+
+배열의 탐색에 사용되는 메소드는 다음과 같다. 이 메소드 역시 `Arrays` 클래스의 다른 메소드들과 마찬가지로 모든 기본 자료형의 배열에 대해 오버로딩 되어 있으나, 아래에서는 `int`형 배열에 대해 정의된 메소드만 보였다.
+
+```java
+public static int binarySearch(int[] a, int key)
+```
+
+> → 배열 `a`에서 `key`를 찾아서 있으면 **`key`의 인덱스 값**, 없으면 **0보다 작은 수** 반환
+
+#### 기본 자료형 배열의 탐색 — 예제 `P475_ArraySearch`
+
+```java
+int[] ar = {33, 55, 11, 44, 22};
+Arrays.sort(ar);        // 탐색 이전에 정렬이 선행되어야 한다.
+
+int idx = Arrays.binarySearch(ar, 33);      // 배열 ar에서 33을 찾아라.
+System.out.println("Index of 33: " + idx);
+```
+
+**실행 결과**
+
+```
+11	22	33	44	55	
+Index of 33: 2
+```
+
+#### 탐색에 앞서 정렬이 필요한 이유
+
+위 예제에서 `binarySearch` 호출에 앞서 **오름차순 정렬을 진행한 사실**에 주목할 필요가 있다.
+
+```java
+Arrays.sort(ar);        // 오름차순 정렬 진행
+```
+
+`Arrays` 클래스의 `binarySearch` 메소드는 **'이진 탐색(Binary Search)'** 이라는 알고리즘을 기반으로 탐색을 진행한다. 그런데 이는 **정렬된 상태의 데이터를 대상으로 하는 탐색 알고리즘**이다. 따라서 배열이 정렬된 상태가 아니라면, **정렬을 한 이후에** `binarySearch` 메소드를 호출해야 한다.
+
+#### Object형 배열에 대한 오버로딩
+
+그리고 이 메소드는 다음과 같이 `Object`형 배열에 대해서도 오버로딩 되어 있다. 물론 이 메소드의 호출을 위해서도 **배열이 정렬된 상태이어야 한다.**
+
+```java
+public static int binarySearch(Object[] a, Object key)
+```
+
+그렇다면 이 메소드가 `key`와 **동일한 인스턴스를 찾았다고 판단하는 기준**은 무엇일까? `Comparable` 인터페이스의 **`compareTo` 메소드가 그 기준**이다. `compareTo` 메소드의 호출을 통해서 **`0`이 반환되면** `key`에 해당하는 인스턴스를 찾았다고 판단한다.
+
+#### 인스턴스 배열의 탐색 — 예제 `P476_ArrayObjSearch`
+
+```java
+class Person implements Comparable {
+    private String name;
+    private int age;
+
+    @Override
+    public int compareTo(Object o) {
+        Person p = (Person)o;
+        return this.age - p.age;        // 나이가 같으면 0을 반환
+    }
+}
+```
+
+```java
+Person[] ar = new Person[3];
+ar[0] = new Person("Lee", 29);
+ar[1] = new Person("Goo", 15);
+ar[2] = new Person("Soo", 37);
+Arrays.sort(ar);        // 탐색에 앞서 정렬을 진행
+
+int idx = Arrays.binarySearch(ar, new Person("Who are you?", 37));
+System.out.println(ar[idx]);
+```
+
+**실행 결과**
+
+```
+Soo: 37
+```
+
+문장의 내용만 놓고 보면 이름이 `"Who are you?"`, 나이가 37인 `Person` 인스턴스를 찾는 것으로 보인다. **그러나 탐색의 결과는 이름이 `"Soo"`이고 나이가 37이다.** 이러한 결과의 원인은 `compareTo` 메소드의 정의에 있다. **나이만 비교하고 이름은 보지 않기 때문**이다.
+
+> **"`binarySearch` 메소드를 통해 인스턴스를 찾고자 하는 경우, 탐색의 대상이 되는 인스턴스들의 클래스는 `Comparable` 인터페이스를 구현한 상태이어야 한다."** → `compareTo` 메소드의 구현 내용을 토대로 탐색이 진행되기 때문이다.
+
+> ⚠️ **주의 — 정렬하지 않으면 있는 값도 못 찾는다**
+> `binarySearch`는 "정렬되어 있다"를 **전제**로 절반씩 잘라 들어가기 때문에, 정렬되지 않은 배열에서는 **배열에 분명히 존재하는 값도 "없음"(음수)으로 반환**한다. 예외가 나지 않고 조용히 틀린 답을 주므로 특히 위험하다. 탐색 전 `Arrays.sort` 호출은 선택이 아니라 필수다.
+
+> 💡 **개발 팁 — 이진 탐색이 빠른 이유와 그 대가**
+> 앞에서부터 하나씩 훑는 선형 탐색이 **O(N)** 인 반면, 이진 탐색은 매번 후보를 절반으로 줄이므로 **O(log N)** 이다. 원소가 100만 개여도 약 20번이면 끝난다.
+> 다만 그 속도는 **"미리 정렬해 둔다"는 대가**로 얻는 것이다. 정렬 자체가 O(N log N)이므로, **한 번만 찾을 거라면 그냥 선형 탐색이 더 빠르다.** 여러 번 반복해서 찾을 때 비로소 정렬 비용을 뽑는다. 이런 "전처리 비용 vs 조회 비용"의 트레이드오프는 인덱스·캐시 설계에서도 똑같이 반복되는 판단이다.
