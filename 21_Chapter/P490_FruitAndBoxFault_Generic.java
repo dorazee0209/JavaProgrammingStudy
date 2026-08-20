@@ -1,5 +1,3 @@
-import java.lang.Exception;
-
 class Apple {
     @Override
     public String toString() {
@@ -10,7 +8,7 @@ class Apple {
 class Orange {
     @Override
     public String toString() {
-        return "I am an orange.";
+        return "I am an orange";
     }
 }
 
@@ -26,19 +24,18 @@ class Box<T> {
     }
 }
 
-public class P489_FruitAndBox2_Generic{
+public class P490_FruitAndBoxFault_Generic {
     public static void main(String[] args) {
-        Box<Apple> aBox = new Box<Apple>();
-        Box<Orange> oBox = new Box<Orange>();
+        Box<Apple> aBox = new Box<>();
+        Box<Orange> oBox = new Box<>();
 
-        aBox.set(new Apple());
-        oBox.set(new Orange());
+        aBox.set("Apple"); // Dev's fault
+        oBox.set("Orange");
 
         Apple ap = aBox.get();
-        Orange or = oBox.get();
+        Orange og = oBox.get();
 
         System.out.println(ap);
-        System.out.println(or);
+        System.out.println(og);
     }
 }
-
