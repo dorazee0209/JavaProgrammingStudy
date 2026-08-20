@@ -615,3 +615,90 @@ class Box<T extends Number> {
 
 > 💡 **개발 팁 — 제약은 자유를 뺏는 대신 능력을 준다**
 > `<T extends Number>`는 담을 수 있는 타입을 좁히지만, 그 대가로 **컴파일러가 `T`에 대해 아는 것이 많아진다.** 아무 제약이 없는 `T`는 `Object`의 메소드밖에 쓸 수 없다. 이 트레이드오프는 API 설계 전반에 나타난다 — 입력을 넓게 받을수록 내부에서 할 수 있는 일이 줄어든다. 그래서 좋은 API는 "받을 수 있는 최대"가 아니라 **"실제로 필요한 최소"**를 요구하도록 설계한다.
+
+### 제네릭 클래스의 타입 인자를 인터페이스로 제한하기
+
+다음과 같이 타입 인자를 제한할 수 있음을 위에서 설명하였다.
+
+```java
+class Box<T extends Number> {...}
+```
+
+이와 유사하게 **인터페이스로도** 타입 인자를 제한할 수 있다. 이와 관련하여 다음 예제를 보자.
+
+```java
+interface Eatable {
+    public String eat();
+}
+
+class Apple implements Eatable {
+    public String toString() {
+        return "I am an apple.";
+    }
+
+    @Override
+    public String eat() {
+        return "It tastes so good!";
+    }
+}
+
+class Box<T extends Eatable> {
+    T ob;
+
+    public void set(T o) {
+        ob = o;
+    }
+    public T get() {
+        System.out.println(ob.eat());   // Eatable로 제한하였기에 eat 호출 가능
+        return ob;
+    }
+}
+
+class BoundedInterfaceBox {
+    public static void main(String[] args) {
+        Box<Apple> box = new Box<>();
+        box.set(new Apple());   // 사과 저장
+
+        Apple ap = box.get();   // 사과 꺼내기
+        System.out.println(ap);
+    }
+}
+```
+
+실행 결과
+
+```
+It tastes so good!
+I am an apple.
+```
+
+예제에서 보이듯이, 제네릭 클래스의 타입 인자를 다음과 같이 인터페이스의 이름으로 제한할 수 있다. 그리고 **제한할 때에는 클래스와 마찬가지로 `extends`를 사용한다.**
+
+```java
+class Box<T extends Eatable> {...}
+```
+
+그리고 `Eatable` 인터페이스를 구현하는 클래스로 타입 인자를 제한했기 때문에 다음과 같이 인터페이스에 선언되어 있는 메소드 `eat`의 호출이 가능하게 되었다.
+
+```java
+class Box<T extends Eatable> {
+    ....
+    public T get() {
+        System.out.println(ob.eat());   // Eatable로 제한하였기에 eat 호출 가능
+        return ob;
+    }
+}
+```
+
+#### 클래스와 인터페이스를 동시에 제한하기
+
+그리고 타입 인자를 제한할 때에는 **하나의 클래스와 하나 이상의 인터페이스에 대해 동시에** 제한을 할 수가 있으며 그 방법은 다음과 같다.
+
+```java
+class Box<T extends Number & Eatable> {...}
+```
+
+이 경우 `Number`를 상속하면서 동시에 `Eatable` 인터페이스를 구현하는 클래스만이 타입 인자로 올 수 있다.
+
+> 💡 **개발 팁 — 여기서는 `implements`가 아니라 `extends`다**
+> 클래스를 구현할 때는 인터페이스에 `implements`를 쓰지만, **타입 인자를 제한할 때는 인터페이스에도 `extends`를 쓴다.** 처음 보면 오타처럼 느껴지는 지점이다. 제네릭의 경계(bound)에서 자바가 묻는 것은 "어떻게 구현했는가"가 아니라 **"이 타입이 저 타입의 하위 타입인가"** 하나뿐이라, 클래스든 인터페이스든 구분할 이유가 없어 `extends`로 통일한 것이다. 그리고 여러 경계를 `&`로 이을 때 **클래스는 반드시 맨 앞에 한 번만** 올 수 있는데, 이는 자바가 클래스 다중 상속을 허용하지 않는 규칙이 제네릭 경계에도 그대로 적용되기 때문이다.
