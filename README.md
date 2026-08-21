@@ -31,7 +31,7 @@
 - [x] Chapter 18 - 예외처리(Exception Handling) (p383-414)
 - [x] Chapter 19 - 자바의 메모리 모델과 Object 클래스 (p415-440)
 - [x] Chapter 20 - 자바의 기본 클래스 (p441-478)
-- [ ] Chapter 21 - 제네릭(Generics) 1 (p479-508)
+- [x] Chapter 21 - 제네릭(Generics) 1 (p479-508)
 - [ ] Chapter 22 - 제네릭(Generics) 2 (p509-542)
 - [ ] Chapter 23 - 컬렉션 프레임워크 1 (List/Set/Queue/Map) (p543-596)
 - [ ] Chapter 24 - 컬렉션 프레임워크 2 (Collections·정렬/탐색) (p597-614)
