@@ -702,3 +702,163 @@ class Box<T extends Number & Eatable> {...}
 
 > 💡 **개발 팁 — 여기서는 `implements`가 아니라 `extends`다**
 > 클래스를 구현할 때는 인터페이스에 `implements`를 쓰지만, **타입 인자를 제한할 때는 인터페이스에도 `extends`를 쓴다.** 처음 보면 오타처럼 느껴지는 지점이다. 제네릭의 경계(bound)에서 자바가 묻는 것은 "어떻게 구현했는가"가 아니라 **"이 타입이 저 타입의 하위 타입인가"** 하나뿐이라, 클래스든 인터페이스든 구분할 이유가 없어 `extends`로 통일한 것이다. 그리고 여러 경계를 `&`로 이을 때 **클래스는 반드시 맨 앞에 한 번만** 올 수 있는데, 이는 자바가 클래스 다중 상속을 허용하지 않는 규칙이 제네릭 경계에도 그대로 적용되기 때문이다.
+
+### 제네릭 메소드의 정의 — 예제 `P503_GenericMethodBoxMarker`
+
+지금까지는 클래스를 제네릭으로 정의하였는데, 이렇듯 클래스 전부가 아닌 **일부 메소드에 대해서만 제네릭으로 정의하는 것도 가능**하며, 이렇게 정의된 메소드를 가리켜 **'제네릭 메소드'**라 한다. 제네릭 메소드는 인스턴스 메소드 뿐만 아니라 다음과 같이 클래스 메소드에 대해서도 정의가 가능하다. 쉽게 말해서 **`static` 선언의 유무에 상관없이** 제네릭 메소드의 정의가 가능하다.
+
+```java
+public static Box<T> makeBox(T o) {...}
+```
+
+위의 메소드 정의에 대해서 다음 내용을 파악할 수 있어야 한다.
+
+> **"메소드의 이름은 makeBox이고 반환형은 Box\<T\>이다."**
+
+그러나 위의 메소드 정의는 완전하지 않다. 이 상태에서 컴파일러는 `T`가 무엇이냐고 물어보며 컴파일 오류를 일으킨다. 따라서 `T`가 타입 매개변수의 선언임을 다음과 같이 표시해야 한다.
+
+```java
+public static <T> Box<T> makeBox(T o) {...}
+```
+
+- `static`과 `Box<T>` 사이에 위치한 `<T>`는 `T`가 타입 매개변수임을 알리는 표시
+
+이후로도 위와 같은 메소드 정의를 보면 `Box<T>`가 반환형임을, 그리고 그 앞에 위치한 `<T>`는 `T`가 타입 매개변수임을 알리는 표시임을 알 수 있어야 한다.
+
+#### 제네릭 메소드의 호출 방법
+
+이제 완전한 제네릭 메소드 하나를 보이겠다. 그리고 이를 기반으로 제네릭 메소드의 호출 방법을 설명하겠다.
+
+```java
+class BoxFactory {
+    public static <T> Box<T> makeBox(T o) {
+        Box<T> box = new Box<T>();   // 상자를 생성하고,
+        box.set(o);                  // 전달된 인스턴스를 상자에 담아서,
+        return box;                  // 상자를 반환한다.
+    }
+}
+```
+
+제네릭 클래스는 **인스턴스 생성 시** 자료형이 결정된다. 반면 제네릭 메소드는 **'메소드 호출시에 자료형이 결정'**된다. 따라서 위 클래스에 정의되어 있는 `makeBox` 제네릭 메소드는 다음과 같이 호출해야 한다.
+
+```java
+Box<String> sBox = BoxFactory.<String>makeBox("Sweet");
+Box<Double> dBox = BoxFactory.<Double>makeBox(7.59);   // 7.59에 대해 오토 박싱 진행됨
+```
+
+위의 두 문장에서 메소드의 이름 앞에 표시한 `<String>`과 `<Double>`이 `T`에 대한 타입 인자이다. 즉 첫 번째 문장에서는 `T`를 `String`으로 결정하여 호출하였고, 두 번째 문장에서는 `Double`로 결정하여 호출하였다. 그런데 위의 두 문장을 다음 두 문장으로 대신할 수도 있다.
+
+```java
+Box<String> sBox = BoxFactory.makeBox("Sweet");
+Box<Double> dBox = BoxFactory.makeBox(7.59);   // 7.59에 대해 오토 박싱 진행됨
+```
+
+위의 두 문장에서는 `T`에 대한 타입 인자 정보가 **생략**되었다. 그러나 컴파일러는 `makeBox`에 전달되는 인자를 보고 `T`를 각각 `String`과 `Double`로 **유추**한다. 그리고 이러한 자료형의 유추는 **오토 박싱까지 감안하여** 이뤄진다. 그럼 지금까지 설명한 내용을 담고 있는 다음 예제를 보자.
+
+```java
+class Box<T> {
+    private T ob;
+
+    public void set(T o) {
+        ob = o;
+    }
+    public T get() {
+        return ob;
+    }
+}
+
+class BoxFactory {
+    public static <T> Box<T> makeBox(T o) {   // 제네릭 메소드의 정의
+        Box<T> box = new Box<T>();            // 상자를 생성하고,
+        box.set(o);                           // 전달된 인스턴스를 상자에 담아서,
+        return box;                           // 이 상자를 반환한다.
+    }
+}
+
+class GenericMethodBoxMaker {
+    public static void main(String[] args) {
+        Box<String> sBox = BoxFactory.makeBox("Sweet");
+        System.out.println(sBox.get());
+
+        Box<Double> dBox = BoxFactory.makeBox(7.59);
+        System.out.println(dBox.get());
+    }
+}
+```
+
+실행 결과
+
+```
+Sweet
+7.59
+```
+
+> 💡 **개발 팁 — 타입 매개변수 선언 위치가 곧 '수명'이다**
+> `class Box<T>`의 `T`는 **인스턴스가 사는 동안** 유지되고, `<T> Box<T> makeBox(T o)`의 `T`는 **그 호출 한 번** 동안만 유효하다. 그래서 제네릭 메소드는 클래스가 제네릭일 필요가 없다 — `BoxFactory`는 평범한 클래스인데 메소드만 제네릭이다. 실무에서 유틸리티 클래스(`Collections`, `Arrays` 등)가 이 형태를 쓴다. **상태를 갖지 않는 도구에 굳이 클래스 차원의 타입 매개변수를 달지 말 것.** 필요한 범위에서만 타입을 열어두는 것이 더 유연하다.
+
+### 제네릭 메소드가 여러 번 등장하는 `T` 읽기 — 예제 `P504_GenericMethodBoxMarker2`
+
+이렇게 해서 제네릭 메소드에 대한 기본적인 설명을 마쳤다. 그런데 의외로 제네릭 메소드에 **여러 차례 등장하는 `T`** 때문에 분석에 어려움을 겪는 경우를 자주 본다. 그래서 예제를 통해서 사례를 추가로 들어보고자 한다.
+
+```java
+class Box<T> {
+    private T ob;
+
+    public void set(T o) {
+        ob = o;
+    }
+    public T get() {
+        return ob;
+    }
+}
+
+class Unboxer {
+    public static <T> T openBox(Box<T> box) {
+        return box.get();
+    }
+}
+
+class GenericMethodBoxMaker2 {
+    public static void main(String[] args) {
+        Box<String> box = new Box<>();
+        box.set("My Generic Method");
+
+        String str = Unboxer.<String>openBox(box);
+        System.out.println(str);
+    }
+}
+```
+
+실행 결과
+
+```
+My Generic Method
+```
+
+위 예제에 정의된 제네릭 메소드는 다음과 같다. 인자로 전달된 상자에서 **내용물을 꺼내 반환하는** 메소드이다.
+
+```java
+class Unboxer {
+    public static <T> T openBox(Box<T> box) {
+        return box.get();
+    }
+}
+```
+
+위의 메소드는 **반환형이 `T`이고 전달인자의 자료형이 `Box<T>`**인 경우이다. 그리고 이 메소드의 호출 방법은 다음과 같다.
+
+```java
+public static void main(String[] args) {
+    Box<String> box = new Box<>();
+    box.set("My Generic Method");
+
+    String str = Unboxer.<String>openBox(box);
+    ....
+}
+```
+
+위의 메소드 호출에서는 `T`가 `String`이어야 하므로 타입 인자가 `<String>`으로 결정되었다. 물론 다음과 같이 이 정보를 **생략할 수 있고 또 이것이 일반적이다.**
+
+```java
+String str = Unboxer.openBox(box);
+```
