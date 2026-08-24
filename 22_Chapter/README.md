@@ -565,3 +565,214 @@ from.set(to.get());    // 프로그래머의 실수! 그러나 컴파일 오류�
 
 > 💡 **개발 팁 — PECS: Producer-Extends, Consumer-Super**
 > 지금까지의 상한·하한 제한에는 이름이 붙어 있다. 매개변수를 **역할**로 먼저 나눈 뒤 와일드카드를 고르는 것이다. 값을 꺼내 쓰기만 하는 쪽은 **생산자(Producer)** 이므로 `? extends T`, 값을 담기만 하는 쪽은 **소비자(Consumer)** 이므로 `? super T`를 쓴다. `moveBox`의 `from`이 생산자, `to`가 소비자인 것이 정확히 이 패턴이다. 이것이 이론에 그치지 않는다는 증거는 표준 라이브러리에 있다 — 앞서 본 `Collections.copy(List<? super T> dest, List<? extends T> src)`가 같은 규칙으로 선언되어 있다. 와일드카드를 "쓸 수 있으면 쓰는 것"이 아니라 **"매개변수마다 읽기 전용인지 쓰기 전용인지를 선언하는 수단"** 으로 보면, 인자 순서를 헷갈리는 것 같은 실수를 실행 시점이 아닌 컴파일 시점에 잡을 수 있다.
+
+### 제한된 와일드카드 선언을 갖는 제네릭 메소드 — 예제 `P535_BoundedWildcardGenericMethod`
+
+앞서 `Toy` 클래스를 담은 상자를 기준으로 다음과 같이 `inBox`와 `outBox` 메소드를 정의하였다.
+
+```java
+class BoxHandler {
+    public static void outBox(Box<? extends Toy> box) {
+        Toy t = box.get();    // 상자에서 꺼내기
+        System.out.println(t);
+    }
+    public static void inBox(Box<? super Toy> box, Toy n) {
+        box.set(n);    // 상자에 넣기
+    }
+}
+```
+
+위의 두 메소드는 `Box<Toy>` 인스턴스를 대상으로 정의된 메소드이다. 이 상황에서 다음 클래스를 정의했다고 가정해보자.
+
+```java
+class Robot {
+    @Override
+    public String toString() { return "I am a Robot"; }
+}
+```
+
+그리고 `Box<Robot>`의 인스턴스를 대상으로 `outBox`와 `inBox` 메소드를 호출하고 싶다고 가정하자. 그렇다면 다음과 같이 오버로딩을 하여 메소드를 정의하는 방법을 고려할 수 있다.
+
+```java
+class BoxHandler {
+    // 다음 두 메소드는 오버로딩 인정 안됨.
+    public static void outBox(Box<? extends Toy> box) {...}
+    public static void outBox(Box<? extends Robot> box) {...}
+
+    // 다음 두 메소드는 두 번째 매개변수로 인해 오버로딩 인정 됨.
+    public static void inBox(Box<? super Toy> box, Toy n) {...}
+    public static void inBox(Box<? super Robot> box, Robot n) {...}
+}
+```
+
+그런데 위 클래스의 다음 두 메소드 정의는 오버로딩이 성립하지 않는다.
+
+```java
+public static void outBox(Box<? extends Toy> box) {...}
+public static void outBox(Box<? extends Robot> box) {...}
+    → 컴파일러는 두 메소드의 오버로딩을 인정하지 않는다.
+```
+
+그 이유는 기술적인 문제에 기인하는데 조금만 설명하면, 자바는 제네릭 등장 이전에 정의된 클래스들과의 상호 호환성 유지를 위해 컴파일 시 제네릭과 와일드카드 관련 정보를 지우는 과정을 거친다. 즉 위의 두 매개변수 선언은 컴파일 과정에서 다음과 같이 수정이 되고, 이로 인해 메소드의 오버로딩이 성립 불가능한 상태가 된다.
+
+```
+Box<? extends Toy> box    →    Box box
+Box<? extends Robot> box  →    Box box
+```
+
+위와 같이 컴파일러가 제네릭 정보를 지우는 행위를 가리켜 'Type Erasure'라 한다. 따라서 위와 같이 오버로딩을 하고 컴파일 하면 다음 메시지가 포함된 에러 메시지가 출력된다.
+
+```
+name clash:
+outBox(Box<? extends Robot>) and outBox(Box<? extends Toy>) have the same erasure
+```
+
+위의 내용을 조금 과장해서(생략 및 축소된 내용을 포함해서) 의역하면 이렇다.
+
+```
+이름 충돌:
+outBox(Box<? extends Robot>)와 outBox(Box<? extends Toy>)은 'Type Erasure'에 의해 매개변수 정보가 같아집니다.
+```
+
+반면 `BoxHandler` 클래스에 정의된 다음 두 메소드는 오버로딩이 인정된다. 이유는 제네릭과 관련 없는 두 번째 매개변수의 자료형이 다르기 때문이다.
+
+```java
+public static void inBox(Box<? super Toy> box, Toy n) {...}
+public static void inBox(Box<? super Robot> box, Robot n) {...}
+    → 두 번째 매개변수의 자료형이 다르므로 오버로딩이 인정된다.
+```
+
+다시 본론으로 돌아와서 `Box<Toy>` 인스턴스와 `Box<Robot>` 인스턴스를 동시에 허용할 수 있도록 `inBox`와 `outBox` 메소드를 정의하려면 어떻게 해야 할까? 답은 다음 예제에서 보이듯이 '제네릭 메소드'에 있다.
+
+```java
+class BoxHandler {
+    public static <T> void outBox(Box<? extends T> box) {
+        T t = box.get();
+        System.out.println(t);
+    }
+
+    public static <T> void inBox(Box<? super T> box, T n) {
+        box.set(n);
+    }
+}
+```
+
+실행 결과
+
+```
+I am a Toy
+I am a Robot
+```
+
+위 예제의 결론은 이렇다. 다음과 같이 메소드를 오버로딩 해야 하는 상황에서는 'Type Erasure'라는 것 때문에 오버로딩으로 인정이 되지 않으니,
+
+```java
+public static void outBox(Box<? extends Toy> box) {...}
+public static void outBox(Box<? extends Robot> box) {...}
+```
+
+다음과 같은 제네릭 메소드의 정의로 이를 대신하자는 것이다.
+
+```java
+public static <T> void outBox(Box<? extends T> box) {...}
+```
+
+그리고 이후에 `<? extends T>` 선언을 볼 일이 있을 텐데, 그때는 지금 설명한 위 예제의 상황을 떠올려 이 선언이 의미하는 바를 이해하길 바란다.
+
+> 💡 **개발 팁 — Type Erasure는 왜 존재하나**
+> 제네릭은 자바 5부터 도입됐지만, 그 이전(자바 4 이하)에 컴파일된 `.class` 파일들과 계속 호환돼야 했다. 그래서 컴파일러는 제네릭 타입 정보를 소스 레벨에서만 검사하고, 바이트코드에는 지운(erase) 채로 남긴다 — 이게 **하위 호환성(backward compatibility)** 을 위한 설계 선택이다. 대가도 있다: 런타임에는 제네릭 타입 정보가 없어서 `new T[]`나 `instanceof List<String>` 같은 코드가 막히고, 지금 본 것처럼 `Box<? extends Toy>`와 `Box<? extends Robot>`도 바이트코드 레벨에선 똑같은 `Box`로 취급돼 오버로딩 충돌이 난다. "왜 제네릭은 런타임에 타입을 모르지?"라는 의문이 들 때마다 이 Type Erasure를 떠올리면 된다.
+
+### 제네릭 인터페이스의 정의와 구현 — 예제 `P538_GetableGenericInterface`, `P539_GetableGenericInterface2`
+
+지금까지 클래스 또는 메소드만 제네릭으로 정의하였지만 인터페이스 역시 클래스와 마찬가지로 제네릭으로 정의할 수 있다. 즉 다음과 같은 형태의 제네릭 인터페이스를 정의할 수 있다.
+
+```java
+interface Getable<T> {
+    public T get();
+}
+
+// 인터페이스 Getable<T>를 구현하는 Box<T> 클래스
+class Box<T> implements Getable<T> {
+    private T ob;
+    public void set(T o) { ob = o; }
+
+    @Override
+    public T get() {
+        return ob;
+    }
+}
+```
+
+실행 결과
+
+```
+I am a Toy
+```
+
+위 예제의 `Box<T>` 클래스는 다음과 같이 `Getable<T>` 인터페이스를 구현하는 형태로 정의되었다.
+
+```java
+class Box<T> implements Getable<T> {...}
+```
+
+따라서 `Getable<T>`형 참조변수로 `Box<T>`의 인스턴스를 참조할 수 있다. 단 T를 대신할 자료형이 다음 문장과 같이 동일해야 참조가 가능하다.
+
+```java
+public static void main(String[] args) {
+    Box<Toy> box = new Box<>();
+    ....
+    Getable<Toy> gt = box;
+    ....
+}
+```
+
+그리고 제네릭 인터페이스를 구현할 때에는 다음과 같이 T를 결정한 상태로 구현할 수도 있다.
+
+```java
+class Box<T> implements Getable<String> {...}
+```
+
+단 이렇듯 제네릭 인터페이스의 T를 `String`으로 결정하면 `Getable<T>`의 메소드를 구현할 때에도 다음과 같이 T가 아닌 `String`으로 명시하고 구현해야 한다.
+
+```java
+@Override
+public String get() {....}
+```
+
+그럼 이와 관련하여 다음 예제를 보자.
+
+```java
+class Box<T> implements Getable<String> {
+    private T ob;
+    public void set(T o) { ob = o; }
+
+    @Override
+    public String get() {    // 반환형은 T가 아닌 String이어야 한다.
+        return ob.toString();
+    }
+}
+```
+
+실행 결과
+
+```
+I am a Toy
+```
+
+따라서 `Getable<String>`형 참조변수는 다음과 같이 `Box<T>` 인스턴스를 T의 자료형에 상관없이 참조할 수 있다.
+
+```java
+public static void main(String[] args) {
+    Box<Toy> box = new Box<>();
+    ....
+    Getable<String> gt = box;
+    ....
+}
+```
+
+> 💡 **개발 팁 — 제네릭 인터페이스는 JDK 곳곳에 있다**
+> `Getable<T>`처럼 "타입을 인자로 받는 인터페이스"는 낯설어 보여도 사실 표준 라이브러리 전반에 깔려 있는 패턴이다. 정렬 기준을 정의하는 `Comparable<T>`, `for-each`를 가능하게 하는 `Iterable<T>`, 스레드 작업 결과를 반환하는 `Callable<T>`가 전부 제네릭 인터페이스다. `Box<T> implements Getable<T>`처럼 구현체가 T를 그대로 넘기면 어떤 타입이든 유연하게 담을 수 있고, `implements Getable<String>`처럼 T를 고정하면 그 구현체는 오직 한 가지 용도로만 특화된다 — 이 둘 중 어느 쪽을 고를지가 곧 클래스 설계의 유연성과 특화 사이의 트레이드오프다.
+
+---
+
+이렇게 해서 제네릭에 대한 다소 길었던 설명을 일단 마쳤는데 내용이 비교적 많았다. 그러나 중간에 끊을 수 있는 부분도 없었고 그냥 넘어가도 될 만한 내용도 없었다. 따라서 다음 Chapter로 넘어가기 전에 충분히 복습할 것을 권하고 싶다.
