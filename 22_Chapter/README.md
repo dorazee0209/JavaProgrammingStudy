@@ -157,7 +157,7 @@ Box<Integer> iBox = EmptyBoxFactory.makeBox();    // 자바 7부터 컴파일 �
 
 ### 와일드카드(Wildcard) — 예제 `P515_WildcardBoxer`, `P516_wildcardUnboxer2`
 
-드디어 제네릭에서 어렵다고 알려진 와일드카드를 설명할 차례이다. 핵심은 제네릭 메소드의 정의에 있다. 앞서 Chapter 21에서 다음 클래스를 정의한 바 있다.
+드디어 제네릭에서 어렵다고 알려진 와일드카드에 대한 설명을 진행할 차례이다. 최대한 쉽게 그리고 정리해 가며 설명을 진행하겠다. 앞서 Chapter 21에서 다음 클래스를 정의한 바 있다. 이 클래스의 핵심은 제네릭 메소드의 정의에 있다.
 
 ```java
 class Unboxer {
@@ -523,6 +523,28 @@ public static void inBox(Box<? super Toy> box, Toy n) {
 ```
 
 위의 상황에서 `get` 메소드의 반환형을 결정할 수 없기 때문에 컴파일러는 `get`의 반환형을 `Object`로 결정해버린다. 그래서 위의 메소드 정의는 컴파일 된다. 그러나 자바는 `Object`형 참조변수의 선언이나 `Object`형으로의 형 변환이 불필요하도록 문법을 개선시켜왔다. **`Object`라는 이름이 코드에 직접 등장하는 것은 컴파일러를 통한 오류의 발견 가능성을 낮추는 행위이기 때문이다.** 그러니 지금 설명하는 부분에서 참조변수를 `Object`형으로 선언하는 것은 논외로 해야 한다. 동시에 당연히 피해야 할 일이기도 하다.
+
+#### 상한과 하한 제한을 모두 적용한 결과
+
+그럼 마지막으로 앞서 보인 예제를 '필요한 만큼만 기능을 허용하여, 코드의 오류가 컴파일 과정에서 최대한 발견되도록' 수준을 높인 결과를 보이겠다.
+
+```java
+class BoxHandler {
+    public static void outBox(Box<? extends Toy> box) {
+        Toy t = box.get();    // 상자에서 꺼내기
+        System.out.println(t);
+    }
+    public static void inBox(Box<? super Toy> box, Toy n) {
+        box.set(n);    // 상자에 넣기
+    }
+}
+```
+
+실행 결과
+
+```
+I am a Toy
+```
 
 ### 언제 와일드카드에 제한을 걸어야 하는가? : 정리하기
 
