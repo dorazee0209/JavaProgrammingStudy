@@ -35,7 +35,7 @@
 - [x] Chapter 22 - 제네릭(Generics) 2 (p509-542)
 - [x] Chapter 23 - 컬렉션 프레임워크 1 (List/Set/Queue/Map) (p543-596)
 - [x] Chapter 24 - 컬렉션 프레임워크 2 (Collections·정렬/탐색) (p597-614)
-- [ ] Chapter 25 - 열거형, 가변 인자, 어노테이션 (p615-640)
+- [x] Chapter 25 - 열거형, 가변 인자, 어노테이션 (p615-640)
 - [ ] Chapter 26 - 네스티드 클래스와 람다의 소개 (p641-662)
 - [ ] Chapter 27 - 람다 표현식 (p663-690)
 - [ ] Chapter 28 - 메소드 참조와 Optional (p691-728)
