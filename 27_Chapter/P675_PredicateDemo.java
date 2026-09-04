@@ -19,7 +19,7 @@ public class P675_PredicateDemo {
         System.out.println("Sum of even numbers: " + s);
 
         s = sum(n -> n%2 == 1, list);
-        System.out.println("Sum of even numbers: " + s);
+        System.out.println("Sum of odd numbers: " + s);
     }
 }
 
