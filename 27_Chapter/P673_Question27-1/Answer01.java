@@ -23,7 +23,31 @@
  */
 
 public class Answer01 {
-    public static void main(String[] args) {
+    @FunctionalInterface
+    interface Calculate<T> {
+        T cal(T a, T b);
+    }
 
+    public static <T> void calAndShow(Calculate<T> op, T n1, T n2) {
+        T r = op.cal(n1, n2);
+        System.out.println(r);
+    }
+
+    public static void main(String[] args) {
+        // 3 + 4
+        Calculate<Integer> ai = (a, b) -> a + b ;
+        calAndShow(ai,3,4);
+
+        // 2.5 + 7.1
+        Calculate<Double> ad = (a, b) -> a + b ;
+        calAndShow(ad, 2.5, 7.1);
+
+        // 4 - 2
+        Calculate<Integer> mi = (a, b) -> a - b;
+        calAndShow(mi,4, 2);
+
+        // 4.9 - 3.2
+        Calculate<Double> md = (a, b) -> a - b;
+        calAndShow(md, 4.9, 3.2);
     }
 }
