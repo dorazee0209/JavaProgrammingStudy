@@ -12,8 +12,29 @@
  * 터를 저장하는 기능의 람다식을 각각 작성하고, 이를 확인하기 위한 예제를 작성해보자.
  */
 
+import java.util.Scanner;
+import java.util.function.BiConsumer;
+
 public class Answer01 {
     public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
 
+        BiConsumer<Box<? super Number>, Number> c = (o, i) -> {
+            if (i instanceof Integer)
+                System.out.print("your input(int) is ");
+            if (i instanceof Double)
+                System.out.print("your input(double) is ");
+            o.set(i);
+            System.out.println(o.get());
+        };
+
+        c.accept(new Box<>(), sc.nextInt());
+        c.accept(new Box<>(), sc.nextDouble());
     }
+}
+
+class Box<T> {
+    private T ob;
+    public void set(T o) { ob = o; }
+    public T get() { return ob; }
 }
